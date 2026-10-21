@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { HARD_MAX_TRANSFERS, PREFERENCES } from "@/lib/search/types";
+import { fareCategorySchema } from "@/lib/validation/route";
 import { vehicleTypeSchema } from "@/lib/validation/transport";
 
 const placeSchema = (label: string) =>
@@ -13,6 +15,9 @@ export const tripSearchSchema = z
     from: placeSchema("a starting point"),
     to: placeSchema("a destination"),
     types: z.array(vehicleTypeSchema).min(1, "Choose at least one transport type."),
+    category: fareCategorySchema.default("regular"),
+    maxTransfers: z.number().int().min(0).max(HARD_MAX_TRANSFERS).default(2),
+    preference: z.enum(PREFERENCES).default("fewest-transfers"),
   })
   .refine((v) => v.from.toLowerCase() !== v.to.toLowerCase(), {
     path: ["to"],

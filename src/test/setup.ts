@@ -18,6 +18,10 @@ if (typeof window !== "undefined") {
 
   await import("@testing-library/jest-dom/vitest");
 
+  // The full suite runs many jsdom files in parallel; the 1 s default makes slow runs flaky.
+  const { configure } = await import("@testing-library/react");
+  configure({ asyncUtilTimeout: 4000 });
+
   afterEach(async () => {
     const { cleanup } = await import("@testing-library/react");
     cleanup();

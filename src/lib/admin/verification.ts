@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { todayInManila } from "@/lib/dates";
 
 /** What an administrator confirms when verifying a route. Keys match public.verify_route(). */
 export const VERIFICATION_CHECKS = [
@@ -14,10 +15,7 @@ export const VERIFICATION_CHECKS = [
 
 export type VerificationCheckKey = (typeof VERIFICATION_CHECKS)[number]["key"];
 
-/** Today's calendar date in Asia/Manila (YYYY-MM-DD), matching the database. */
-export function todayInManila(now = new Date()): string {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Manila", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
-}
+export { todayInManila };
 
 const checksShape = Object.fromEntries(
   VERIFICATION_CHECKS.map((c) => [c.key, z.literal(true, { error: "Confirm this before verifying." })]),

@@ -1,5 +1,6 @@
 import { computeDashboard, type Dashboard } from "@/lib/admin/dashboard";
 import type { AdminClient } from "@/lib/admin/session";
+import { fetchAll } from "@/lib/data/paginate";
 import type { RouteDraft } from "@/lib/admin/route-form";
 import { parseLineGeometry } from "@/lib/routes/geometry";
 import type { ExistingData, ParsedImport } from "@/lib/import/validate";
@@ -12,19 +13,6 @@ export type StopRow = Tables["stops"]["Row"];
 export type FareRow = Tables["fare_rules"]["Row"];
 export type VerificationRow = Tables["route_verifications"]["Row"];
 export type BatchRow = Tables["import_batches"]["Row"];
-
-const PAGE = 1000;
-
-/** PostgREST caps responses (1000 rows by default), so page through everything. */
-async function fetchAll<T>(page: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>): Promise<T[]> {
-  const out: T[] = [];
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await page(from, from + PAGE - 1);
-    if (error) throw new Error(error.message);
-    out.push(...(data ?? []));
-    if (!data || data.length < PAGE) return out;
-  }
-}
 
 export async function loadDashboard(supabase: AdminClient): Promise<{ dashboard: Dashboard; routes: RouteRow[]; stops: StopRow[] }> {
   const [routes, stops, fares, shapes, reports] = await Promise.all([

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useId, useRef, useState, useTransition } from "react";
+import { useId, useRef, useState } from "react";
 import { Field, Notice, textareaClass } from "@/components/admin/admin-ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +34,8 @@ export function ImportWizard() {
   const [reviewed, setReviewed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ImportCommitted | null>(null);
-  const [pending, startTransition] = useTransition();
+  // Which step is running. (useTransition's flag outlives the step, so the wrong label could flash.)
+  const [busy, setBusy] = useState<"checking" | "importing" | null>(null);
   const inputs = useRef<Partial<Record<ImportKind, HTMLInputElement | null>>>({});
 
   const selected = IMPORT_KINDS.filter((k) => files[k]);
@@ -45,16 +46,20 @@ export function ImportWizard() {
     return form;
   };
 
-  const check = () =>
-    startTransition(async () => {
-      setError(null);
+  const check = async () => {
+    setError(null);
+    setBusy("checking");
+    try {
       const res = await previewImportAction(buildForm());
       if (!res.ok) return setError(res.error);
       setPreview(res.data);
       setReport(res.data.report);
       setReviewed(false);
       setStage("preview");
-    });
+    } finally {
+      setBusy(null);
+    }
+  };
 
   /** Nothing has been written at this point, so cancelling only clears the form. */
   const cancel = () => {
@@ -69,10 +74,11 @@ export function ImportWizard() {
     setStage("choose");
   };
 
-  const commit = () =>
-    startTransition(async () => {
-      if (!preview) return;
-      setError(null);
+  const commit = async () => {
+    if (!preview) return;
+    setError(null);
+    setBusy("importing");
+    try {
       const form = buildForm();
       form.set("batchId", preview.batchId);
       form.set("source", source);
@@ -85,7 +91,10 @@ export function ImportWizard() {
         setError(res.error);
         if (res.report) setReport(res.report);
       }
-    });
+    } finally {
+      setBusy(null);
+    }
+  };
 
   if (stage === "done" && result) {
     return (
@@ -108,7 +117,7 @@ export function ImportWizard() {
 
   const errors = report?.issues.filter((i) => i.severity === "error") ?? [];
   const warnings = report?.issues.filter((i) => i.severity === "warning") ?? [];
-  const canCommit = Boolean(report?.ok) && reviewed && source.trim().length >= 3 && !pending;
+  const canCommit = Boolean(report?.ok) && reviewed && source.trim().length >= 3 && busy === null;
   const total = report ? report.counts.stops + report.counts.routes + report.counts.route_stops + report.counts.fare_rules : 0;
 
   return (
@@ -131,7 +140,7 @@ export function ImportWizard() {
                 }}
                 type="file"
                 accept=".csv,text/csv"
-                disabled={stage !== "choose" || pending}
+                disabled={stage !== "choose" || busy !== null}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
                   setFiles((prev) => {
@@ -147,8 +156,8 @@ export function ImportWizard() {
           ))}
         </div>
         {stage === "choose" && (
-          <Button type="button" onClick={check} disabled={selected.length === 0 || pending}>
-            {pending ? "Checking…" : "Check files"}
+          <Button type="button" onClick={check} disabled={selected.length === 0 || busy !== null}>
+            {busy === "checking" ? "Checking…" : "Check files"}
           </Button>
         )}
       </section>
@@ -214,10 +223,10 @@ export function ImportWizard() {
             </label>
             <div className="flex flex-wrap gap-2">
               <Button type="button" onClick={commit} disabled={!canCommit}>
-                {pending ? "Importing…" : `Import ${total} ${total === 1 ? "record" : "records"}`}
+                {busy === "importing" ? "Importing…" : `Import ${total} ${total === 1 ? "record" : "records"}`}
               </Button>
-              <Button type="button" variant="outline" onClick={cancel} disabled={pending}>Cancel (nothing is saved)</Button>
-              <Button type="button" variant="ghost" onClick={() => setStage("choose")} disabled={pending}>Change files</Button>
+              <Button type="button" variant="outline" onClick={cancel} disabled={busy !== null}>Cancel (nothing is saved)</Button>
+              <Button type="button" variant="ghost" onClick={() => setStage("choose")} disabled={busy !== null}>Change files</Button>
             </div>
           </section>
         </>
