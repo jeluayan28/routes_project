@@ -1,10 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { readPublicEnv } from "@/lib/env";
+import type { Database } from "@/types/database";
 
 /**
  * Server Supabase client bound to the request's cookies (admin sessions).
- * Still uses the anon key: privileges come from the signed-in user + RLS.
+ * Still uses the publishable key: privileges come from the signed-in user + RLS.
  * The service-role key is intentionally not used anywhere.
  */
 export async function createClient() {
@@ -15,9 +16,9 @@ export async function createClient() {
     );
   }
   const cookieStore = await cookies();
-  return createServerClient(
+  return createServerClient<Database>(
     result.env.NEXT_PUBLIC_SUPABASE_URL,
-    result.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    result.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     {
       cookies: {
         getAll: () => cookieStore.getAll(),

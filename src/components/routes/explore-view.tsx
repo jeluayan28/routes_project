@@ -5,16 +5,16 @@ import { useId, useMemo, useState } from "react";
 import { ChevronUp, MapPinOff, Search, SearchX, Info, ArrowLeft } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { SampleDataBanner } from "@/components/common/sample-data-banner";
-import { RoutesMapLazy } from "@/components/map/routes-map-lazy";
+import { MapToolbar } from "@/components/map/map-toolbar";
+import { RouteMapLazy } from "@/components/map/route-map-lazy";
 import { RouteDetailsPanel } from "@/components/routes/route-details-panel";
 import { RouteList } from "@/components/routes/route-list";
-import { TransportFilter } from "@/components/search/transport-filter";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { DataSource } from "@/lib/data/routes";
 import { filterRoutes } from "@/lib/routes/filter";
 import { cn } from "@/lib/utils";
-import type { Route } from "@/lib/validation/route";
+import type { DirectionKind, Route } from "@/lib/validation/route";
 import type { VehicleType } from "@/lib/validation/transport";
 
 export type ExploreViewProps = {
@@ -41,7 +41,9 @@ export function ExploreView({
   const [selectedId, setSelectedId] = useState<string | null>(
     routes.some((r) => r.id === initialSelectedId) ? initialSelectedId : null,
   );
-  // Mobile bottom sheet; ignored on large screens where the list is a sidebar.
+  // Direction shown for the selected route; null means its first direction.
+  const [direction, setDirection] = useState<DirectionKind | null>(null);
+  // Mobile bottom panel; ignored on large screens where the list is a sidebar.
   const [expanded, setExpanded] = useState(true);
 
   const visible = useMemo(() => filterRoutes(routes, { query, types }), [routes, query, types]);
@@ -54,19 +56,37 @@ export function ExploreView({
     setTypes(["jeepney", "multicab"]);
   };
 
-  const select = (route: Route) => {
-    setSelectedId(route.id);
-    setExpanded(true);
+  // The one place selection changes, so list, map, dropdown and popups stay in step.
+  const select = (route: Route | null) => {
+    setSelectedId(route?.id ?? null);
+    setDirection(null);
+    if (route) setExpanded(true);
   };
 
   return (
-    <div className="relative flex h-[calc(100svh-3.5rem)] min-h-[34rem] flex-col lg:flex-row">
-      <div className="absolute inset-0 isolate lg:static lg:flex-1">
-        <RoutesMapLazy
+    <div className="flex h-[calc(100svh-3.5rem)] min-h-[34rem] flex-col lg:flex-row">
+      <div className="relative min-h-[16rem] flex-1 lg:min-h-0">
+        <RouteMapLazy
           routes={mapRoutes}
           selectedId={selectedId}
+          selectedDirection={direction}
           onSelect={select}
-          onClearSelection={() => setSelectedId(null)}
+          onClearSelection={() => select(null)}
+          captureGestures
+          toolbar={
+            <MapToolbar
+              types={types}
+              onTypesChange={setTypes}
+              routes={mapRoutes}
+              selectedId={selectedId}
+              onSelect={select}
+            />
+          }
+          emptyMessage={
+            routes.length === 0
+              ? "No routes have been published yet."
+              : "No routes match the current filters."
+          }
           label={
             selected
               ? `Map showing route ${selected.code}`
@@ -78,7 +98,7 @@ export function ExploreView({
 
       <aside
         aria-label="Routes"
-        className="absolute inset-x-0 bottom-0 z-10 flex max-h-[68%] flex-col rounded-t-2xl border-t bg-background shadow-[0_-4px_16px_rgba(15,27,61,0.12)] lg:static lg:order-first lg:max-h-none lg:w-[26rem] lg:shrink-0 lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none"
+        className="flex max-h-[55svh] shrink-0 flex-col rounded-t-2xl border-t bg-background shadow-[0_-4px_16px_rgba(15,27,61,0.12)] lg:order-first lg:max-h-none lg:w-[26rem] lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none"
       >
         <button
           type="button"
@@ -114,11 +134,17 @@ export function ExploreView({
 
           {selected ? (
             <div className="space-y-4">
-              <Button type="button" variant="ghost" size="sm" onClick={() => setSelectedId(null)}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => select(null)}>
                 <ArrowLeft aria-hidden="true" />
                 Clear selection
               </Button>
-              <RouteDetailsPanel route={selected} variant="summary" />
+              <RouteDetailsPanel
+                key={selected.id}
+                route={selected}
+                variant="summary"
+                direction={direction ?? selected.directions[0].kind}
+                onDirectionChange={setDirection}
+              />
             </div>
           ) : (
             <>
@@ -138,7 +164,6 @@ export function ExploreView({
                     className="h-10 bg-card pl-9"
                   />
                 </div>
-                <TransportFilter value={types} onChange={setTypes} />
               </div>
 
               <p aria-live="polite" className="text-sm text-muted-foreground">
@@ -155,7 +180,7 @@ export function ExploreView({
                 <EmptyState
                   icon={SearchX}
                   title="No transport type selected"
-                  description="Choose Jeepney, Multicab, or both to see routes."
+                  description="Turn on Jeepney, Multicab, or both in the map filter to see routes."
                   action={
                     <Button type="button" variant="outline" onClick={clearFilters}>
                       Show all types

@@ -128,3 +128,60 @@
     @apply font-sans;
   }
 }
+
+/* --- Route map ----------------------------------------------------------- */
+.leaflet-container {
+  font: inherit;
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+}
+.leaflet-popup-content p,
+.leaflet-popup-content h3 {
+  margin: 0;
+}
+.route-hit-line {
+  cursor: pointer;
+}
+
+.stop-marker {
+  background: none;
+  border: 0;
+}
+.stop-marker > span {
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: 6px;
+  border-radius: 9999px;
+  border: 3px solid #1e293b;
+  background: #ffffff;
+  box-shadow: 0 0 0 1.5px #ffffff;
+}
+.stop-marker--start > span {
+  background: #16a34a;
+  border-color: #14532d;
+  width: 20px;
+  height: 20px;
+  margin: 4px;
+}
+.stop-marker--end > span {
+  background: #dc2626;
+  border-color: #7f1d1d;
+  width: 20px;
+  height: 20px;
+  margin: 4px;
+}
+/* Not verified: dashed ring so status never relies on colour alone. */
+.stop-marker--unverified > span,
+.stop-marker--outdated > span,
+.stop-marker--sample > span {
+  border-style: dashed;
+}
+.stop-marker--dim {
+  opacity: 0.5;
+}
+.stop-marker:focus-visible > span {
+  outline: 3px solid #2563eb;
+  outline-offset: 2px;
+}

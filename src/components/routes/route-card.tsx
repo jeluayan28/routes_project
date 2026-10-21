@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { VerificationBadge } from "@/components/common/verification-badge";
 import { VehicleIcon } from "@/components/routes/vehicle-icon";
 import { VEHICLE_LABEL } from "@/lib/format";
+import { routeColor } from "@/lib/routes/colors";
 import { routeEndpoints } from "@/lib/routes/filter";
 import { cn } from "@/lib/utils";
 import type { Route } from "@/lib/validation/route";
@@ -22,6 +23,7 @@ export function RouteCard({ route, selected = false, onSelect, className }: Rout
     <>
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-2 text-sm font-medium text-primary">
+          <span aria-hidden="true" className="size-3 shrink-0 rounded-full" style={{ background: routeColor(route.id) }} />
           <VehicleIcon type={route.vehicleType} className="size-4" />
           {route.code}
           <span className="sr-only">, {VEHICLE_LABEL[route.vehicleType]}</span>

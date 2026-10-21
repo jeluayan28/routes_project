@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ArrowLeft } from "lucide-react";
 import { ErrorMessage } from "@/components/common/error-message";
 import { SampleDataBanner } from "@/components/common/sample-data-banner";
-import { RoutesMapLazy } from "@/components/map/routes-map-lazy";
+import { RouteMapLazy } from "@/components/map/route-map-lazy";
 import { RouteDetailsPanel } from "@/components/routes/route-details-panel";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getRouteById } from "@/lib/data/routes";
@@ -30,7 +30,7 @@ async function RouteContent({ params }: { params: PageProps<"/routes/[id]">["par
           <RouteDetailsPanel route={route} headingLevel="h1" />
         </div>
         <div className="isolate order-first h-80 overflow-hidden rounded-2xl border shadow-xs lg:sticky lg:top-20 lg:order-none lg:h-[calc(100svh-7rem)]">
-          <RoutesMapLazy
+          <RouteMapLazy
             routes={[route]}
             selectedId={route.id}
             label={`Map highlighting route ${route.code}`}

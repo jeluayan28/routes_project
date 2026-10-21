@@ -7,6 +7,7 @@ import { z } from "zod";
 export const verificationStatusSchema = z.enum([
   "verified",
   "unverified",
+  "outdated",
   "sample",
 ]);
 export type VerificationStatus = z.infer<typeof verificationStatusSchema>;

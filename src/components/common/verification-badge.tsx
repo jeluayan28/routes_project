@@ -1,4 +1,4 @@
-import { BadgeCheck, CircleHelp, FlaskConical, type LucideIcon } from "lucide-react";
+import { BadgeCheck, CircleHelp, Clock, FlaskConical, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { VerificationStatus } from "@/lib/validation/transport";
@@ -18,6 +18,12 @@ const STATUS: Record<
     description: "Reported but not yet confirmed. May be wrong or outdated.",
     icon: CircleHelp,
     className: "border-amber-600/40 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100",
+  },
+  outdated: {
+    label: "Outdated",
+    description: "Was verified in the past but may no longer be accurate.",
+    icon: Clock,
+    className: "border-orange-600/40 bg-orange-50 text-orange-900 dark:bg-orange-950 dark:text-orange-100",
   },
   sample: {
     label: "Sample data",

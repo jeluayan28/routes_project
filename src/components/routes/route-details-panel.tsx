@@ -3,24 +3,30 @@ import { ArrowLeftRight, ArrowRight, Receipt } from "lucide-react";
 import { VerificationBadge } from "@/components/common/verification-badge";
 import { FareBadge } from "@/components/fares/fare-badge";
 import { ReportLink } from "@/components/reports/report-link";
-import { StopList } from "@/components/routes/stop-list";
+import { DirectionStops } from "@/components/routes/direction-stops";
 import { VehicleIcon } from "@/components/routes/vehicle-icon";
 import { buttonVariants } from "@/components/ui/button";
 import { VEHICLE_LABEL } from "@/lib/format";
 import { routeEndpoints } from "@/lib/routes/filter";
-import type { Route } from "@/lib/validation/route";
+import { routeColor } from "@/lib/routes/colors";
+import type { DirectionKind, Route } from "@/lib/validation/route";
 
 type RouteDetailsPanelProps = {
   route: Route;
   /** "summary" fits the explore sidebar; "full" is the details page. */
   variant?: "summary" | "full";
   headingLevel?: "h1" | "h2";
+  /** Direction whose stops are listed. Leave out for the panel to manage it. */
+  direction?: DirectionKind;
+  onDirectionChange?: (kind: DirectionKind) => void;
 };
 
 export function RouteDetailsPanel({
   route,
   variant = "full",
   headingLevel = "h2",
+  direction,
+  onDirectionChange,
 }: RouteDetailsPanelProps) {
   const { start, end } = routeEndpoints(route);
   const Heading = headingLevel;
@@ -30,6 +36,7 @@ export function RouteDetailsPanel({
     <div className="space-y-6">
       <header className="space-y-2">
         <p className="flex items-center gap-2 text-sm font-medium text-primary">
+          <span aria-hidden="true" className="size-3 shrink-0 rounded-full" style={{ background: routeColor(route.id) }} />
           <VehicleIcon type={route.vehicleType} className="size-4" />
           {VEHICLE_LABEL[route.vehicleType]} · {route.code}
         </p>
@@ -93,9 +100,9 @@ export function RouteDetailsPanel({
 
       <section aria-labelledby={`stops-heading-${route.id}`} className="space-y-3">
         <h2 id={`stops-heading-${route.id}`} className="font-semibold">
-          Stops <span className="font-normal text-muted-foreground">({route.stops.length})</span>
+          Stops
         </h2>
-        <StopList stops={route.stops} />
+        <DirectionStops directions={route.directions} value={direction} onValueChange={onDirectionChange} />
       </section>
 
       <div className="flex flex-wrap gap-2">

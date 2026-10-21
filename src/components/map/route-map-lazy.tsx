@@ -2,10 +2,10 @@
 
 import dynamic from "next/dynamic";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { RoutesMapProps } from "@/components/map/routes-map";
+import type { RouteMapProps } from "@/components/map/route-map";
 
 // Leaflet touches `window`, so the map is client-only and code-split.
-const RoutesMap = dynamic(() => import("@/components/map/routes-map"), {
+const RouteMap = dynamic(() => import("@/components/map/route-map"), {
   ssr: false,
   loading: () => (
     <div role="status" className="relative h-full w-full">
@@ -15,6 +15,6 @@ const RoutesMap = dynamic(() => import("@/components/map/routes-map"), {
   ),
 });
 
-export function RoutesMapLazy(props: RoutesMapProps) {
-  return <RoutesMap {...props} />;
+export function RouteMapLazy(props: RouteMapProps) {
+  return <RouteMap {...props} />;
 }

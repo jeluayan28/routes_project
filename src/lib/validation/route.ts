@@ -24,8 +24,33 @@ export const routeStopSchema = z.object({
   id: z.string(),
   name: z.string(),
   position: coordinateSchema,
+  status: verificationStatusSchema,
+  /** Passengers may board here on this route. */
+  canBoard: z.boolean(),
+  /** Passengers may get off here on this route. */
+  canAlight: z.boolean(),
 });
 export type RouteStop = z.infer<typeof routeStopSchema>;
+
+export const directionKindSchema = z.enum(["outbound", "inbound"]);
+export type DirectionKind = z.infer<typeof directionKindSchema>;
+
+/**
+ * One travel direction of a route. Each direction has its own ordered stops and
+ * its own geometry, because a return trip often uses different streets.
+ */
+export const routeDirectionSchema = z.object({
+  kind: directionKindSchema,
+  /** Ordered from where this direction starts to where it ends. */
+  stops: z.array(routeStopSchema),
+  /**
+   * Recorded geometry as one or more lines (a MultiLineString has several).
+   * Empty when no shape has been recorded: nothing is drawn, and a line is
+   * never inferred from the stops.
+   */
+  paths: z.array(z.array(coordinateSchema).min(2)),
+});
+export type RouteDirection = z.infer<typeof routeDirectionSchema>;
 
 export const routeSchema = z.object({
   id: z.string(),
@@ -33,12 +58,11 @@ export const routeSchema = z.object({
   name: z.string(),
   vehicleType: vehicleTypeSchema,
   status: verificationStatusSchema,
+  /** "one-way" when only an outbound direction is recorded. */
   direction: z.enum(["both", "one-way"]),
   directionNote: z.string().optional(),
-  /** Ordered from the starting point to the ending point. */
-  stops: z.array(routeStopSchema),
-  /** Route line, ordered start to end. */
-  path: z.array(coordinateSchema),
+  /** Outbound first. At least one entry. */
+  directions: z.array(routeDirectionSchema).min(1),
   fares: z.array(fareRecordSchema),
 });
 export type Route = z.infer<typeof routeSchema>;
