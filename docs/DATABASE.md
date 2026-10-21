@@ -17,7 +17,24 @@ exist only inside `supabase/tests/`, in transactions that roll back.
 | `landmarks` | Named places for the origin/destination pickers. |
 | `route_reports` | Public correction reports. Write-only for the public. |
 | `audit_logs` | Append-only log of administrator changes. |
+| `route_verifications` | History of verifications: who, the calendar date and source, and the eight checks that were confirmed. Admin-only, add-only. |
+| `import_batches` | One row per committed CSV import: administrator, declared source, file names/hashes, counts. Admin-only, add-only. |
 | `private.admin_users` | Administrator allow-list (not exposed through the API). |
+
+`routes` and `stops` also have `is_sample` (a sample record can never be verified), and `routes`, `stops` and `fare_rules` have `import_batch_id`.
+
+### Administrator functions
+
+Called through the Data API by signed-in administrators only (each checks `private.is_admin()`). Each is one transaction.
+
+| Function | Purpose |
+|---|---|
+| `save_route(route_id, data)` | Create (always a draft) or update a route with its ordered stops and geometry per direction. Rewrites only what changed. |
+| `verify_route(route_id, verified_on, source, checks, notes)` | The only way for an API caller to mark a route verified. Requires a source, a date that is not in the future, all eight checks, complete content (start/end labels, 2+ outbound stops, outbound geometry, inbound geometry if it has stops, no sample or 0,0 stops). Verifies the route's stops, shapes and fares together. |
+| `commit_import(payload)` | Inserts a validated CSV bundle. Insert-only; everything is a draft and unverified; records the batch. |
+| `is_current_user_admin()` | Lets the app gate its admin pages. |
+
+Guards (for API roles only; the `postgres` role used by the SQL editor is not restricted): a route, stop, shape or fare cannot be set to verified except through `verify_route`; editing anything that was verified (route name/code/type/labels, stop name/location/permissions, the stop list, geometry) returns the route to unverified.
 
 `public.route_shapes_geojson` is a `security_invoker` view returning shapes as GeoJSON.
 
@@ -145,3 +162,7 @@ These cannot be done by migration:
 - The map and route pages read approved routes through `src/lib/data/routes.ts`
   (see `docs/MAP.md`). Fares are not mapped yet; `Route.fares` is empty for
   database routes. The DB has no `sample` verification status, only fixtures do.
+- The admin workflow's SQL (`20261021090000_admin_workflow.sql`) is exercised by
+  `npm test` through PGlite with a small PostGIS stand-in (`src/test/db`). It has
+  not been run against real PostGIS. Run `npm run db:reset && npm run db:test` once
+  Docker is available and see `docs/ADMIN.md`.

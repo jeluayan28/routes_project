@@ -1,0 +1,3 @@
+route_ref,from_stop_ref,to_stop_ref,passenger_type,amount,effective_from,effective_until,source_description
+R1,S1,S3,regular,0.01,2026-01-01,,FICTIONAL placeholder - not a real fare
+R1,S1,S3,student,0.01,2026-01-01,,FICTIONAL placeholder - not a real fare

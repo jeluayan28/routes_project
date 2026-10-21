@@ -1,0 +1,6 @@
+route_ref,direction,stop_order,stop_ref,boarding_allowed,dropoff_allowed
+R1,outbound,1,S1,,
+R1,outbound,2,S2,,
+R1,outbound,3,S3,,
+R1,inbound,1,S3,,
+R1,inbound,2,S1,,

@@ -62,10 +62,16 @@ rollback;
 --
 -- 2c. Publish a route once its data has been checked against a real source.
 --     A route is public only when status = 'active' AND verification_status = 'verified'.
+--     Normally do this in the admin editor (Verification & status tab). From SQL, verify
+--     with the function so the source, date and checklist are recorded. It must run as an
+--     administrator through the API; in the SQL editor you can also set the columns
+--     directly, but then no verification record is kept, so prefer the editor.
 --
---   update public.routes
---   set status = 'active', verification_status = 'verified', last_verified_at = now()
---   where code = '<route code>';
+--   select public.verify_route(
+--     '<route uuid>', '<yyyy-mm-dd the source was checked>', '<source description>',
+--     '{"transport_type":true,"name_direction":true,"endpoints":true,"stops":true,
+--       "geometry":true,"boarding_dropoff":true,"fares":true,"passenger_categories":true}'::jsonb);
+--   update public.routes set status = 'active' where id = '<route uuid>';
 --
 -- 2d. Record a verified fare (stops are optional; omit both for a flat fare).
 --

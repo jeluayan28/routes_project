@@ -185,3 +185,22 @@
   outline: 3px solid #2563eb;
   outline-offset: 2px;
 }
+
+/* --- Admin editor map -------------------------------------------------------- */
+.editor-stop {
+  background: none;
+  border: 0;
+}
+.editor-stop > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+  background: #1e293b;
+  color: #ffffff;
+  font: 600 12px/1 var(--font-sans), system-ui, sans-serif;
+  box-shadow: 0 0 0 1.5px #1e293b;
+}

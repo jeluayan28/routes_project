@@ -1,0 +1,4 @@
+ref,name,latitude,longitude,barangay,landmark_description,pickup_allowed,dropoff_allowed,sample
+S1,[SAMPLE] Stop One,0.0010,0.0010,Placeholder Barangay,Fictional landmark,true,true,true
+S2,[SAMPLE] Stop Two,0.0020,0.0030,,,true,false,true
+S3,[SAMPLE] Stop Three,0.0030,0.0050,,,false,true,true
