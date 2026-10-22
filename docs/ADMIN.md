@@ -87,11 +87,32 @@ direction has stops, and no sample stop or stop at 0,0. On success the route, it
 together, and a verification record (administrator, date, source, checks, notes) is kept. The public "last verified" date is
 the date you entered, not the day you clicked.
 
+## Reports, audit log, preview and stops
+
+* **`/admin/reports`**: public correction reports, filterable (all, open, pending, reviewed, resolved, rejected) and paginated. Set a
+  status with the buttons (resolving or rejecting asks first). In the database these are `new`, `reviewing`, `resolved`, `rejected`;
+  administrators see Pending, Reviewed, Resolved, Rejected. The reporter contact is shown only here, never publicly, and is kept out
+  of the audit log. Only the `status` column can be changed.
+* **`/admin/audit`**: the append-only log of changes to routes, route approvals, fares, stops, geometry and reports, newest first,
+  with who did it (the account id, not an email) and what changed, filterable by kind and paginated. For updates it stores the
+  previous values (`audit_logs.previous`), which is how "route deactivated" and "fare price changed (₱12.00 to ₱13.00)" are known.
+* **Route preview**: a tab in the route editor that renders the public route page from the current draft (including unsaved
+  changes), and says whether and why the route is public right now.
+* **Stops**: after choosing a location the editor lists recorded stops within 150 m. A stop within 15 m is flagged as a possible
+  duplicate; creating it needs a confirmation, and the server enforces that too.
+* **Fares**: the list shows each fare's source and verification date. Verified fares offer **Change price** and **End fare** instead of
+  edit and delete (history is kept, see `docs/FARES.md`). An overlapping period is reported before saving, and refused by the database.
+
 ## Progress dashboard
 
 | Card | Definition |
 |---|---|
+| Active routes | Status is active (sample routes excluded). |
 | Draft routes | Status is draft. |
+| Verified stops | Verification status is verified (sample stops excluded). |
+| Fare rules needing verification | On a real route, and unverified, outdated, or verified more than 180 days ago. |
+| Pending public reports | Reports with status new (nobody has looked at them). |
+| Recently updated | The ten newest audit-log entries. |
 | Verified routes | Verified, and last verified no more than 180 days ago. |
 | Routes needing review | Not draft, and: marked outdated, **or** verified more than 180 days ago, **or** active but not verified, **or** has an open correction report (new or reviewing). |
 | Routes missing fare records | No fare rule at all. |

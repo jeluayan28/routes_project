@@ -1,3 +1,4 @@
+import type { AcceptedStatus, FareAvailability, FareSummary, LegFare, RawFare } from "@/lib/fares/types";
 import type { DirectionKind, FareCategory } from "@/lib/validation/route";
 import type { Coordinate, VehicleType, VerificationStatus } from "@/lib/validation/transport";
 
@@ -44,19 +45,6 @@ export type RawRoute = {
   directions: RawDirection[];
 };
 
-export type RawFare = {
-  routeId: string;
-  /** Both null for a flat fare on the whole route. */
-  fromStopId: string | null;
-  toStopId: string | null;
-  category: FareCategory;
-  /** Pesos. */
-  amount: number;
-  effectiveFrom: string;
-  effectiveUntil: string | null;
-  status: VerificationStatus;
-};
-
 /** An administrator-verified walkable connection between two stops (optional). */
 export type RawTransferLink = {
   fromStopId: string;
@@ -79,8 +67,8 @@ export type RawNetwork = {
 export type Preference = "lowest-fare" | "fewest-transfers" | "shortest-walking";
 export const PREFERENCES: readonly Preference[] = ["lowest-fare", "fewest-transfers", "shortest-walking"];
 
-/** Data states the engine will use. Production uses only "verified". */
-export type AcceptedStatus = Extract<VerificationStatus, "verified" | "sample">;
+// Fare types live with the fare calculator and are re-exported for the engine's callers.
+export type { AcceptedStatus, FareAvailability, FareSummary, LegFare, RawFare };
 
 export type SearchOptions = {
   passengerCategory: FareCategory;
@@ -121,8 +109,6 @@ export const DEFAULT_SEARCH_OPTIONS: Omit<SearchOptions, "date"> = {
 // ---------------------------------------------------------------------------
 // Built network
 // ---------------------------------------------------------------------------
-
-export type FareAvailability = "flat" | "by-stop-pair" | "none";
 
 /** Directed connection between two consecutive stops of one route direction. */
 export type GraphEdge = {
@@ -194,17 +180,6 @@ export type TransitNetwork = {
 
 export type StopRef = { stopId: string; name: string; position: Coordinate };
 
-export type LegFare =
-  | {
-      status: "known";
-      amount: number;
-      category: FareCategory;
-      basis: "stop-to-stop" | "flat";
-      dataStatus: AcceptedStatus;
-      effectiveFrom: string;
-    }
-  | { status: "unavailable"; reason: "no-fare-record" | "no-fare-for-category" | "fare-not-verified" };
-
 export type WalkBasis = "same-stop" | "verified-link" | "straight-line-estimate";
 
 export type WalkStep = {
@@ -243,16 +218,6 @@ export type RideStep = {
 };
 
 export type JourneyStep = WalkStep | RideStep;
-
-export type FareSummary =
-  | { status: "complete"; total: number; currency: "PHP"; breakdown: { routeId: string; routeName: string; amount: number }[] }
-  | {
-      status: "incomplete";
-      /** Sum of the segments whose fare is known. Not a total. */
-      knownSubtotal: number;
-      currency: "PHP";
-      missing: { routeId: string; routeName: string; reason: Extract<LegFare, { status: "unavailable" }>["reason"] }[];
-    };
 
 export type Journey = {
   /** Stable for the same boarding/alighting stops on the same routes. */

@@ -21,7 +21,7 @@ export type RouteRowIn = { id: string; code: string | null; name: string; transp
 export type LinkRowIn = { route_id: string; direction: DirectionKind; stop_order: number; boarding_allowed: boolean | null; dropoff_allowed: boolean | null; stop_id: string };
 export type StopRowIn = { id: string; name: string; latitude: number; longitude: number; pickup_allowed: boolean; dropoff_allowed: boolean; verification_status: VerificationStatus };
 export type ShapeRowIn = { route_id: string | null; direction: DirectionKind | null; geojson: unknown; verification_status: VerificationStatus | null };
-export type FareRowIn = { route_id: string; from_stop_id: string | null; to_stop_id: string | null; passenger_type: FareCategory; amount: number; effective_from: string; effective_until: string | null; verification_status: VerificationStatus };
+export type FareRowIn = { id: string; source_description: string | null; verified_at: string | null; currency: string; route_id: string; from_stop_id: string | null; to_stop_id: string | null; passenger_type: FareCategory; amount: number; effective_from: string; effective_until: string | null; verification_status: VerificationStatus };
 export type LandmarkRowIn = { id: string; name: string; category: string; latitude: number; longitude: number; verification_status: VerificationStatus };
 
 export type SearchRows = {
@@ -76,7 +76,11 @@ export function assembleSearchData(rows: SearchRows): SearchData {
   });
 
   const fares: RawFare[] = rows.fares.map((f) => ({
+    id: f.id,
     routeId: f.route_id,
+    currency: f.currency,
+    source: f.source_description,
+    verifiedAt: f.verified_at,
     fromStopId: f.from_stop_id,
     toStopId: f.to_stop_id,
     category: f.passenger_type,
@@ -124,7 +128,7 @@ export async function loadSearchData(): Promise<DataResult<SearchData>> {
       fetchAll<ShapeRowIn>((a, b) =>
         db.from("route_shapes_geojson").select("route_id, direction, geojson, verification_status").eq("verification_status", "verified").order("id").range(a, b)),
       fetchAll<FareRowIn>((a, b) =>
-        db.from("fare_rules").select("route_id, from_stop_id, to_stop_id, passenger_type, amount, effective_from, effective_until, verification_status").eq("verification_status", "verified").order("id").range(a, b)),
+        db.from("fare_rules").select("id, route_id, from_stop_id, to_stop_id, passenger_type, amount, currency, effective_from, effective_until, verification_status, source_description, verified_at").eq("verification_status", "verified").order("id").range(a, b)),
       fetchAll<LandmarkRowIn>((a, b) =>
         db.from("landmarks").select("id, name, category, latitude, longitude, verification_status").eq("verification_status", "verified").order("id").range(a, b)),
     ]);

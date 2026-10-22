@@ -7,11 +7,11 @@ export type Database = {
           Tables: {
             "audit_logs": {
                   Row: {
-                    "action": Database["public"]['Enums']["audit_action"],"admin_id": string | null,"changes": Json | null,"created_at": string,"entity_id": string | null,"entity_type": string,"id": number
+                    "action": Database["public"]['Enums']["audit_action"],"admin_id": string | null,"changes": Json | null,"created_at": string,"entity_id": string | null,"entity_type": string,"id": number,"previous": Json | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "action": Database["public"]['Enums']["audit_action"],"admin_id"?: string | null,"changes"?: Json | null,"created_at"?: string,"entity_id"?: string | null,"entity_type": string,"id"?: never
+                    "action": Database["public"]['Enums']["audit_action"],"admin_id"?: string | null,"changes"?: Json | null,"created_at"?: string,"entity_id"?: string | null,"entity_type": string,"id"?: never,"previous"?: Json | null
                   }
                   Update: {
                     "action"?: Database["public"]['Enums']["audit_action"],"admin_id"?: string | null,"changes"?: Json | null,"created_at"?: string,"entity_id"?: string | null,"entity_type"?: string,"id"?: never
@@ -246,6 +246,8 @@ isOneToOne: false
           Functions: {
             commit_import: { Args: { p_payload: Json }; Returns: Json }
             is_current_user_admin: { Args: never; Returns: boolean }
+            change_fare: { Args: { p_amount: number; p_effective_from: string; p_fare_id: string; p_source: string }; Returns: string }
+            end_fare: { Args: { p_effective_until: string; p_fare_id: string }; Returns: undefined }
             save_route: { Args: { p_data: Json; p_route_id: string }; Returns: string }
             verify_route: {
               Args: { p_checks: Json; p_notes?: string; p_route_id: string; p_source: string; p_verified_on: string }

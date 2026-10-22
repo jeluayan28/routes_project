@@ -5,9 +5,9 @@ import { Field, Notice, formatDate, selectClass } from "@/components/admin/admin
 import { VerificationBadge } from "@/components/common/verification-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { deleteFareAction, saveFareAction } from "@/lib/admin/actions/fares";
+import { changeFareAction, deleteFareAction, endFareAction, saveFareAction } from "@/lib/admin/actions/fares";
 import type { EditorStop, FareRow } from "@/lib/admin/data";
-import { fareInputSchema } from "@/lib/admin/fare-form";
+import { changeFareSchema, endFareSchema, fareInputSchema, findOverlap } from "@/lib/admin/fare-form";
 import { FARE_CATEGORY_LABEL, formatPeso } from "@/lib/format";
 import { fareCategorySchema, type FareCategory } from "@/lib/validation/route";
 
@@ -32,6 +32,9 @@ type Form = {
   source: string;
 };
 
+/** A verified fare is history: it is changed by a new rule from a date, or ended, never edited. */
+type HistoryAction = { fareId: string; kind: "change" | "end"; amount: string; date: string; source: string };
+
 const BLANK: Form = { id: null, from: "", to: "", passengerType: "regular", amount: "", effectiveFrom: "", effectiveUntil: "", source: "" };
 
 export function FaresEditor({ routeId, fares, stops, dirty, onChange }: Props) {
@@ -40,6 +43,8 @@ export function FaresEditor({ routeId, fares, stops, dirty, onChange }: Props) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState<{ tone: "error" | "success"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
+  const [history, setHistory] = useState<HistoryAction | null>(null);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const names = new Map(stops.map((s) => [s.id, s.name]));
   const set = <K extends keyof Form>(key: K, value: Form[K]) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -59,11 +64,40 @@ export function FaresEditor({ routeId, fares, stops, dirty, onChange }: Props) {
         return;
       }
       setErrors({});
+      const clash = findOverlap(fares, parsed.data);
+      if (clash) {
+        setErrors({ effectiveFrom: `This overlaps an existing ${FARE_CATEGORY_LABEL[clash.passenger_type].toLowerCase()} fare (${formatDate(clash.effective_from)}${clash.effective_until ? ` to ${formatDate(clash.effective_until)}` : " onward"}). End that fare first, or use Change price.` });
+        return;
+      }
       const res = await saveFareAction(input);
       if (!res.ok) return setMessage({ tone: "error", text: res.error });
       onChange(form.id ? fares.map((f) => (f.id === res.data.id ? res.data : f)) : [res.data, ...fares]);
       setForm(BLANK);
       setMessage({ tone: "success", text: "Fare saved. It stays unverified until the route is verified." });
+    });
+
+  const submitHistory = () =>
+    startTransition(async () => {
+      if (!history) return;
+      setHistoryError(null);
+      const isChange = history.kind === "change";
+      const input = isChange
+        ? { fareId: history.fareId, amount: history.amount, effectiveFrom: history.date, source: history.source }
+        : { fareId: history.fareId, effectiveUntil: history.date };
+      const parsed = (isChange ? changeFareSchema : endFareSchema).safeParse(input);
+      if (!parsed.success) return setHistoryError(parsed.error.issues[0]?.message ?? "Some values are not valid.");
+      const res = isChange ? await changeFareAction(input) : await endFareAction(input);
+      if (!res.ok) return setHistoryError(res.error);
+      const rows = isChange ? (res.data as FareRow[]) : (res.data ? [res.data as FareRow] : []);
+      const byId = new Map(rows.map((r) => [r.id, r]));
+      onChange([...rows.filter((r) => !fares.some((f) => f.id === r.id)), ...fares.map((f) => byId.get(f.id) ?? f)]);
+      setHistory(null);
+      setMessage({
+        tone: "success",
+        text: isChange
+          ? "New price saved from that date. The old fare was kept and ended the day before. The new price stays unverified until the route is verified."
+          : "Fare ended. It stays in the history.",
+      });
     });
 
   const remove = (fare: FareRow) =>
@@ -97,21 +131,59 @@ export function FaresEditor({ routeId, fares, stops, dirty, onChange }: Props) {
                     <p className="text-sm">{label(fare)}</p>
                     <p className="text-xs text-muted-foreground">
                       From {formatDate(fare.effective_from)}{fare.effective_until ? ` until ${formatDate(fare.effective_until)}` : ", no end date"}
-                      {fare.source_description ? ` · ${fare.source_description}` : ""}
+                      {fare.source_description ? ` · Source: ${fare.source_description}` : " · No source recorded"}
+                      {fare.verified_at ? ` · Verified ${formatDate(fare.verified_at)}` : " · Not verified"}
                     </p>
                   </div>
                   <VerificationBadge status={fare.verification_status} />
                 </div>
-                <div className="mt-2 flex gap-2">
-                  <Button type="button" size="sm" variant="outline" onClick={() => {
-                    setForm({
-                      id: fare.id, from: fare.from_stop_id ?? "", to: fare.to_stop_id ?? "", passengerType: fare.passenger_type,
-                      amount: String(fare.amount), effectiveFrom: fare.effective_from, effectiveUntil: fare.effective_until ?? "", source: fare.source_description ?? "",
-                    });
-                    setErrors({});
-                  }}>Edit<span className="sr-only"> this fare</span></Button>
-                  <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => remove(fare)}>Delete<span className="sr-only"> this fare</span></Button>
-                </div>
+                {fare.verified_at ? (
+                  <div className="mt-2 space-y-2">
+                    <p className="text-xs text-muted-foreground">Verified fares are kept as history and cannot be edited.</p>
+                    <div className="flex gap-2">
+                      <Button type="button" size="sm" variant="outline" onClick={() => { setHistory({ fareId: fare.id, kind: "change", amount: "", date: "", source: "" }); setHistoryError(null); }}>Change price<span className="sr-only"> of this fare</span></Button>
+                      <Button type="button" size="sm" variant="outline" onClick={() => { setHistory({ fareId: fare.id, kind: "end", amount: "", date: "", source: "" }); setHistoryError(null); }}>End fare<span className="sr-only"> on a date</span></Button>
+                    </div>
+                    {history?.fareId === fare.id && (
+                      <form noValidate className="grid gap-2 rounded-md border bg-muted/40 p-3 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); submitHistory(); }}>
+                        {history.kind === "change" && (
+                          <>
+                            <Field id={uid + "-h-amount"} label="New amount (₱)">
+                              <Input id={uid + "-h-amount"} inputMode="decimal" value={history.amount} onChange={(e) => setHistory({ ...history, amount: e.target.value })} />
+                            </Field>
+                            <Field id={uid + "-h-date"} label="New price starts on">
+                              <Input id={uid + "-h-date"} type="date" value={history.date} onChange={(e) => setHistory({ ...history, date: e.target.value })} />
+                            </Field>
+                            <Field id={uid + "-h-source"} label="Source of the new fare" className="sm:col-span-2">
+                              <Input id={uid + "-h-source"} value={history.source} maxLength={300} onChange={(e) => setHistory({ ...history, source: e.target.value })} />
+                            </Field>
+                          </>
+                        )}
+                        {history.kind === "end" && (
+                          <Field id={uid + "-h-date"} label="Last day this fare applies">
+                            <Input id={uid + "-h-date"} type="date" value={history.date} onChange={(e) => setHistory({ ...history, date: e.target.value })} />
+                          </Field>
+                        )}
+                        {historyError && <div className="sm:col-span-2"><Notice tone="error">{historyError}</Notice></div>}
+                        <div className="flex gap-2 sm:col-span-2">
+                          <Button type="submit" size="sm" disabled={pending}>{pending ? "Saving…" : history.kind === "change" ? "Save new price" : "End fare"}</Button>
+                          <Button type="button" size="sm" variant="outline" onClick={() => setHistory(null)}>Cancel</Button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-2 flex gap-2">
+                    <Button type="button" size="sm" variant="outline" onClick={() => {
+                      setForm({
+                        id: fare.id, from: fare.from_stop_id ?? "", to: fare.to_stop_id ?? "", passengerType: fare.passenger_type,
+                        amount: String(fare.amount), effectiveFrom: fare.effective_from, effectiveUntil: fare.effective_until ?? "", source: fare.source_description ?? "",
+                      });
+                      setErrors({});
+                    }}>Edit<span className="sr-only"> this fare</span></Button>
+                    <Button type="button" size="sm" variant="outline" disabled={pending} onClick={() => remove(fare)}>Delete<span className="sr-only"> this fare</span></Button>
+                  </div>
+                  )}
               </li>
             ))}
           </ul>

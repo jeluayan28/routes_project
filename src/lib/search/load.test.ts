@@ -62,8 +62,8 @@ describe("assembleSearchData", () => {
   });
 
   it("maps fares, including the status they were stored with", () => {
-    const d = assembleSearchData(rows({ fares: [{ route_id: "R1", from_stop_id: "A", to_stop_id: "C", passenger_type: "student", amount: 8.5, effective_from: "2026-01-01", effective_until: null, verification_status: "verified" }] }));
-    expect(d.network.fares).toEqual([{ routeId: "R1", fromStopId: "A", toStopId: "C", category: "student", amount: 8.5, effectiveFrom: "2026-01-01", effectiveUntil: null, status: "verified" }]);
+    const d = assembleSearchData(rows({ fares: [{ id: "F1", currency: "PHP", source_description: "Test source", verified_at: "2026-01-02T00:00:00Z", route_id: "R1", from_stop_id: "A", to_stop_id: "C", passenger_type: "student", amount: 8.5, effective_from: "2026-01-01", effective_until: null, verification_status: "verified" }] }));
+    expect(d.network.fares).toEqual([{ id: "F1", currency: "PHP", source: "Test source", verifiedAt: "2026-01-02T00:00:00Z", routeId: "R1", fromStopId: "A", toStopId: "C", category: "student", amount: 8.5, effectiveFrom: "2026-01-01", effectiveUntil: null, status: "verified" }]);
   });
 
   it("provides stops and landmarks for place lookup", () => {
@@ -73,7 +73,7 @@ describe("assembleSearchData", () => {
   });
 
   it("produces a network the engine can search end to end", () => {
-    const d = assembleSearchData(rows({ fares: [{ route_id: "R1", from_stop_id: null, to_stop_id: null, passenger_type: "regular", amount: 10, effective_from: "2026-01-01", effective_until: null, verification_status: "verified" }] }));
+    const d = assembleSearchData(rows({ fares: [{ id: "F2", currency: "PHP", source_description: null, verified_at: null, route_id: "R1", from_stop_id: null, to_stop_id: null, passenger_type: "regular", amount: 10, effective_from: "2026-01-01", effective_until: null, verification_status: "verified" }] }));
     const opts = { passengerCategory: "regular" as const, date: "2026-06-01", acceptStatuses: ["verified"] as const };
     const out = searchJourneys(buildNetwork(d.network, opts), { label: "A", position: d.stops[0].position, stopId: "A" }, { label: "C", position: d.stops[2].position, stopId: "C" }, opts);
     expect(out.status === "ok" && out.journeys[0].fare).toMatchObject({ status: "complete", total: 10 });

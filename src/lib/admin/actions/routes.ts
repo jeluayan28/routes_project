@@ -6,6 +6,7 @@ import { searchStops, type EditorStop } from "@/lib/admin/data";
 import { parseCoordinatePair, routeDraftSchema, toSaveRoutePayload } from "@/lib/admin/route-form";
 import { describeDbError, done, fail, withAdmin, type ActionResult } from "@/lib/admin/session";
 import { todayInManila, verificationInputSchema } from "@/lib/admin/verification";
+import { NEARBY_RADIUS_METERS, boundingBox, findNearbyStops, possibleDuplicates, type NearbyStop } from "@/lib/admin/nearby";
 import { distanceMeters } from "@/lib/routes/geometry";
 import type { Json } from "@/types/database";
 
@@ -94,6 +95,22 @@ export async function deleteRouteAction(routeId: string): Promise<ActionResult> 
 // Stops
 // ---------------------------------------------------------------------------
 
+/** Stops near a point, nearest first, so a new stop is not created on top of an existing one. */
+export async function nearbyStopsAction(latitude: unknown, longitude: unknown): Promise<ActionResult<NearbyStop[]>> {
+  return withAdmin(async ({ supabase }) => {
+    const pair = parseCoordinatePair(String(latitude), String(longitude));
+    if (!pair.ok) return fail("Choose a valid location first.");
+    const box = boundingBox(pair.coordinate, NEARBY_RADIUS_METERS);
+    const { data, error } = await supabase
+      .from("stops").select("id, name, latitude, longitude")
+      .gte("latitude", box.minLat).lte("latitude", box.maxLat)
+      .gte("longitude", box.minLng).lte("longitude", box.maxLng)
+      .limit(200);
+    if (error) return fail(describeDbError(error));
+    return done(findNearbyStops(data ?? [], pair.coordinate));
+  });
+}
+
 export async function searchStopsAction(query: string): Promise<ActionResult<EditorStop[]>> {
   return withAdmin(async ({ supabase }) => {
     if (typeof query !== "string" || query.length > 100) return fail("That search is not valid.");
@@ -102,6 +119,8 @@ export async function searchStopsAction(query: string): Promise<ActionResult<Edi
 }
 
 const stopInputSchema = z.object({
+  /** Set after the administrator has seen the stops already nearby and still wants a new one. */
+  confirmNearby: z.boolean().optional(),
   name: z.string().trim().min(1, "Give the stop a name.").max(200),
   latitude: z.number(),
   longitude: z.number(),
@@ -115,9 +134,10 @@ function stopFields(input: unknown) {
   const parsed = stopInputSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: firstIssue(parsed.error) } as const;
   const v = parsed.data;
+  const confirmNearby = v.confirmNearby === true;
   const pair = parseCoordinatePair(String(v.latitude), String(v.longitude));
   if (!pair.ok) return { ok: false, error: Object.values(pair.errors).filter(Boolean).join(" ") } as const;
-  return { ok: true, v, coordinate: pair.coordinate } as const;
+  return { ok: true, v, coordinate: pair.coordinate, confirmNearby } as const;
 }
 
 /** Creates an unverified stop (verification happens with its route). Refuses an obvious duplicate. */
@@ -137,6 +157,11 @@ export async function createStopAction(input: unknown): Promise<ActionResult<Edi
       (s) => s.name.trim().toLowerCase() === v.name.toLowerCase() && distanceMeters(coordinate, { lat: s.latitude, lng: s.longitude }) <= 10,
     );
     if (twin) return fail(`A stop called “${twin.name}” already exists at this spot. Search for it and add that one instead.`);
+
+    const nearby = possibleDuplicates(findNearbyStops(near ?? [], coordinate));
+    if (nearby.length > 0 && !f.confirmNearby) {
+      return fail(`Possible duplicate: ${nearby.map((n) => `“${n.name}” (${n.meters} m away)`).join(", ")}. Use that stop, or confirm to create a new one anyway.`, { nearby: "possible-duplicate" });
+    }
 
     const { data, error } = await supabase.from("stops").insert({
       name: v.name, latitude: coordinate.lat, longitude: coordinate.lng,

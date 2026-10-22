@@ -7,9 +7,13 @@ import type { EditorStop, FareRow } from "@/lib/admin/data";
 
 const saveFareAction = vi.fn();
 const deleteFareAction = vi.fn();
+const changeFareAction = vi.fn();
+const endFareAction = vi.fn();
 vi.mock("@/lib/admin/actions/fares", () => ({
   saveFareAction: (...a: unknown[]) => saveFareAction(...a),
   deleteFareAction: (...a: unknown[]) => deleteFareAction(...a),
+  changeFareAction: (...a: unknown[]) => changeFareAction(...a),
+  endFareAction: (...a: unknown[]) => endFareAction(...a),
 }));
 
 const R = "00000000-0000-4000-8000-0000000000aa";
@@ -40,6 +44,8 @@ const fillBasics = async (amount = "10") => {
 beforeEach(() => {
   saveFareAction.mockReset();
   deleteFareAction.mockReset();
+  changeFareAction.mockReset();
+  endFareAction.mockReset();
   vi.spyOn(window, "confirm").mockReturnValue(true);
 });
 
@@ -159,5 +165,42 @@ describe("editing and deleting", () => {
     await userEvent.click(screen.getByRole("button", { name: /Delete/ }));
     await waitFor(() => expect(onChange).toHaveBeenCalledWith([]));
     expect(deleteFareAction).toHaveBeenCalledWith(F1);
+  });
+});
+
+describe("verified fares are history", () => {
+  const verified = () => fare({ verification_status: "verified", verified_at: "2026-02-01T00:00:00Z" });
+
+  it("offers a price change and an end date instead of edit and delete", () => {
+    setup([verified()]);
+    expect(screen.queryByRole("button", { name: /^Edit/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^Delete/ })).toBeNull();
+    expect(screen.getByRole("button", { name: /Change price/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /End fare/ })).toBeTruthy();
+  });
+
+  it("changes the price from a date, keeping the old rule in the list", async () => {
+    const created = fare({ id: "00000000-0000-4000-8000-0000000000f9", amount: 9, effective_from: "2026-07-01" });
+    const ended = { ...verified(), effective_until: "2026-06-30" };
+    changeFareAction.mockResolvedValue({ ok: true, data: [created, ended] });
+    const { onChange } = setup([verified()]);
+    await userEvent.click(screen.getByRole("button", { name: /Change price/ }));
+    await userEvent.type(screen.getByLabelText("New amount (₱)"), "9");
+    fireEvent.change(screen.getByLabelText("New price starts on"), { target: { value: "2026-07-01" } });
+    await userEvent.type(screen.getByLabelText("Source of the new fare"), "Fictional table");
+    await userEvent.click(screen.getByRole("button", { name: "Save new price" }));
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith([created, ended]));
+    expect(changeFareAction).toHaveBeenCalledWith({ fareId: F1, amount: "9", effectiveFrom: "2026-07-01", source: "Fictional table" });
+  });
+
+  it("does not call the server for an invalid new amount", async () => {
+    setup([verified()]);
+    await userEvent.click(screen.getByRole("button", { name: /Change price/ }));
+    await userEvent.type(screen.getByLabelText("New amount (₱)"), "-4");
+    fireEvent.change(screen.getByLabelText("New price starts on"), { target: { value: "2026-07-01" } });
+    await userEvent.type(screen.getByLabelText("Source of the new fare"), "Fictional table");
+    await userEvent.click(screen.getByRole("button", { name: "Save new price" }));
+    expect(await screen.findByText(/negative/i)).toBeTruthy();
+    expect(changeFareAction).not.toHaveBeenCalled();
   });
 });

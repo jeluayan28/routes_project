@@ -1,4 +1,5 @@
-import { toCentavos } from "@/lib/search/fares";
+import { toCentavos } from "@/lib/fares/money";
+import { formatPeso } from "@/lib/format";
 import type { Journey, Preference } from "@/lib/search/types";
 
 type Keys = {
@@ -47,7 +48,7 @@ export function describeRank(j: Journey, preference: Preference): string {
   const k = keys(j);
   switch (preference) {
     case "lowest-fare":
-      return j.fare.status === "complete" ? `Total fare ₱${j.fare.total.toFixed(2)}` : "Fare not fully known";
+      return j.fare.status === "complete" ? `Total fare ${formatPeso(j.fare.total)}` : "Fare not fully known";
     case "shortest-walking":
       return `About ${k.walking} m of walking`;
     default:

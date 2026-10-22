@@ -87,6 +87,9 @@ walk is within the limit. Nothing else.
 
 ## Fares (`fares.ts`)
 
+The rules below live in the fare calculator (`src/lib/fares/`, see `docs/FARES.md`); `fares.ts` adapts it for the engine. Records that are
+malformed or that conflict with each other are rejected, and the reason is reported.
+
 Only fares in an accepted status (production: **verified**) and in force on the search date (Asia/Manila) count. A rule for the exact
 origin and destination wins over a flat route fare. Direction matters (A→B does not price B→A). **The category is never substituted**:
 with no student fare, the regular fare is not shown as the student fare. An unverified fare is never used, only given as the reason

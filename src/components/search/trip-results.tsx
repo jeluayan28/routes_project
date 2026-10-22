@@ -10,20 +10,15 @@ import { TripMapLazy } from "@/components/search/trip-map-lazy";
 import { VehicleIcon } from "@/components/routes/vehicle-icon";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { FARE_CATEGORY_LABEL, VEHICLE_LABEL, formatPeso } from "@/lib/format";
+import { TripFare } from "@/components/fares/trip-fare";
+import { FARE_CATEGORY_LABEL, VEHICLE_LABEL } from "@/lib/format";
 import { routeColor } from "@/lib/routes/colors";
 import { describeRank } from "@/lib/search/rank";
 import { tripQuery, type TripParams } from "@/lib/search/params";
 import type { ResolvedLocation } from "@/lib/search/locations";
 import type { TripSearchResponse } from "@/lib/search/service";
-import type { Journey, LegFare, RideStep } from "@/lib/search/types";
+import type { Journey, RideStep } from "@/lib/search/types";
 import { cn } from "@/lib/utils";
-
-const FARE_REASON: Record<Extract<LegFare, { status: "unavailable" }>["reason"], (category: string) => string> = {
-  "no-fare-record": () => "No fare has been recorded for this ride.",
-  "no-fare-for-category": (c) => `No ${c} fare has been recorded for this ride.`,
-  "fare-not-verified": () => "A fare exists but has not been verified, so it is not shown.",
-};
 
 const formatMeters = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
 const formatDate = (iso: string) => new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "Asia/Manila" }).format(new Date(iso));
@@ -202,7 +197,7 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
           {describeRank(journey, params.preference)} · {journey.summary.transfers === 0 ? "No transfers" : `${journey.summary.transfers} transfer${journey.summary.transfers === 1 ? "" : "s"}`}
           {journey.summary.walkingMeters > 0 && ` · about ${formatMeters(journey.summary.walkingMeters)} walking`}
         </p>
-        <Fare journey={journey} category={params.category} />
+        <TripFare journey={journey} category={params.category} />
         <div className="flex flex-wrap gap-1.5">
           <Badge variant="outline" className={journey.verification.dataStatus === "verified" ? "border-emerald-600/40 bg-emerald-50 text-emerald-900" : "border-sky-600/40 bg-sky-50 text-sky-900"}>
             {journey.verification.dataStatus === "verified" ? "Verified routes" : "Sample data"}
@@ -241,13 +236,6 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
                     </ol>
                   </details>
                 )}
-                <p>
-                  {step.fare.status === "known" ? (
-                    <>Fare {formatPeso(step.fare.amount)}{step.fare.basis === "flat" ? " (flat route fare)" : ""}</>
-                  ) : (
-                    <span className="text-amber-800">{FARE_REASON[step.fare.reason](FARE_CATEGORY_LABEL[params.category].toLowerCase())}</span>
-                  )}
-                </p>
                 {step.geometry.status === "unavailable" && <p className="text-muted-foreground">The path for this ride is not shown on the map.</p>}
               </div>
             </li>
@@ -263,35 +251,5 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
         </ul>
       )}
     </article>
-  );
-}
-
-function Fare({ journey, category }: { journey: Journey; category: TripParams["category"] }) {
-  const fare = journey.fare;
-  if (fare.status === "complete") {
-    return (
-      <div>
-        <p className="text-2xl font-semibold tabular-nums">{formatPeso(fare.total)}</p>
-        {fare.breakdown.length > 1 && (
-          <dl className="mt-1 space-y-0.5 text-sm text-muted-foreground">
-            {fare.breakdown.map((b, i) => (
-              <div key={`${b.routeId}${i}`} className="flex justify-between gap-4">
-                <dt>{b.routeName}</dt>
-                <dd className="tabular-nums">{formatPeso(b.amount)}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-      </div>
-    );
-  }
-  return (
-    <div className="rounded-lg border border-amber-600/40 bg-amber-50 px-3 py-2 text-sm text-amber-950">
-      <p className="font-medium">Total fare not available</p>
-      <p>
-        We don&apos;t have a verified {FARE_CATEGORY_LABEL[category].toLowerCase()} fare for {fare.missing.map((m) => m.routeName).join(", ")}.
-        {fare.knownSubtotal > 0 && <> The other segments cost {formatPeso(fare.knownSubtotal)}.</>}
-      </p>
-    </div>
   );
 }

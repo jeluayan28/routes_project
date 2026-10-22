@@ -45,7 +45,7 @@ describe("journeys", () => {
     expect(screen.getByRole("heading", { name: "1 option" })).toBeInTheDocument();
     const card = screen.getByRole("article");
     expect(within(card).getByText("₱15.50")).toBeInTheDocument();
-    expect(within(card).getByText("Fixture route R1")).toBeInTheDocument();
+    expect(within(card).getByText(/R1 · Fixture route R1/)).toBeInTheDocument();
     expect(within(card).getByText("₱8.00")).toBeInTheDocument();
     expect(within(card).getByText("₱7.50")).toBeInTheDocument();
     expect(within(card).getByText(/Board Jeepney R1 \(Fixture route R1\) at Fixture stop A, toward Fixture stop C\. Get off at Fixture stop C after 2 stops\./)).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe("journeys", () => {
     await show(raw);
     const card = screen.getByRole("article");
     expect(within(card).getByText("Verified routes")).toBeInTheDocument();
-    expect(within(card).getByText(/^Verified .*2026/)).toBeInTheDocument();
+    expect(within(card).getAllByText(/^Verified .*2026/).length).toBeGreaterThan(0);
     expect(within(card).getByText("No travel time available")).toBeInTheDocument();
     expect(screen.getByText(/no timing data/i)).toBeInTheDocument();
   });
@@ -80,16 +80,16 @@ describe("journeys", () => {
   it("gives no total when a segment's fare is missing, and says which and why", async () => {
     await show(network(raw.routes, [flatFare("R1", 8)]));
     expect(screen.getByText("Total fare not available")).toBeInTheDocument();
-    expect(screen.getByText(/verified regular fare for Fixture route R2/)).toBeInTheDocument();
-    expect(screen.getByText(/The other segments cost ₱8\.00/)).toBeInTheDocument();
+    expect(screen.getByText(/every ride has a verified regular fare/)).toBeInTheDocument();
+    expect(screen.getByText(/add up to ₱8.00, which is not the trip total/)).toBeInTheDocument();
     expect(screen.queryByText("₱15.50")).toBeNull();
-    expect(screen.getByText("No fare has been recorded for this ride.")).toBeInTheDocument();
+    expect(screen.getByText("No fare has been recorded for this ride.", { exact: false })).toBeInTheDocument();
   });
 
   it("explains a missing fare for the chosen passenger category", async () => {
     await show(network([route("R1", ["A", "B"])], [flatFare("R1", 8)]), { to: "Fixture stop B", category: "student" });
     expect(screen.getByText("No student fare has been recorded for this ride.")).toBeInTheDocument();
-    expect(screen.getByText(/Student fare/)).toBeInTheDocument();
+    expect(screen.getAllByText(/Student fare/).length).toBeGreaterThan(0);
   });
 
   it("explains an unverified fare is not shown", async () => {

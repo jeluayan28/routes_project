@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ErrorMessage } from "@/components/common/error-message";
 import { buttonVariants } from "@/components/ui/button";
+import { formatDate } from "@/components/admin/admin-ui";
+import { describeAudit } from "@/lib/admin/audit";
 import { REVIEW_REASON_LABEL } from "@/lib/admin/dashboard";
 import { loadDashboard } from "@/lib/admin/data";
 import { requireAdminPage } from "@/lib/admin/session";
@@ -21,11 +23,15 @@ export default async function AdminDashboardPage() {
     console.error("Dashboard failed", error);
     return <ErrorMessage title="Couldn't load the dashboard" message="The progress figures could not be loaded. Nothing has been changed." />;
   }
-  const { dashboard: d, routes } = loaded;
+  const { dashboard: d, routes, recent } = loaded;
   const byId = new Map(routes.map((r) => [r.id, r]));
 
   const cards: Card[] = [
-    { title: "Draft routes", count: d.draft.length, href: "/admin/routes?filter=draft", description: "Being prepared. Never shown to the public." },
+    { title: "Active routes", count: d.counts.activeRoutes, href: "/admin/routes?filter=active", description: "Set to active. Public only when also verified." },
+    { title: "Draft routes", count: d.counts.draftRoutes, href: "/admin/routes?filter=draft", description: "Being prepared. Never shown to the public." },
+    { title: "Verified stops", count: d.counts.verifiedStops, href: "/admin/stops?filter=verified", description: "Stops confirmed together with a verified route." },
+    { title: "Fare rules needing verification", count: d.counts.faresNeedingVerification, href: "/admin/routes?filter=farereview", description: "Unverified, outdated, or verified too long ago to rely on.", tone: "warn" },
+    { title: "Pending public reports", count: d.counts.pendingReports, href: "/admin/reports?status=new", description: "Corrections from the public that nobody has looked at yet.", tone: "warn" },
     { title: "Verified routes", count: d.verified.length, href: "/admin/routes?filter=verified", description: "Verified with a source and date, and not stale. Public only when also active." },
     { title: "Routes needing review", count: d.needsReview.length, href: "/admin/routes?filter=review", description: "Outdated, stale, active without verification, or with an open report.", tone: "warn" },
     { title: "Routes missing fare records", count: d.missingFares.length, href: "/admin/routes?filter=nofares", description: "No fare rule has been recorded at all.", tone: "warn" },
@@ -63,6 +69,28 @@ export default async function AdminDashboardPage() {
           </li>
         ))}
       </ul>
+
+      <section aria-labelledby="recent-heading" className="space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <h2 id="recent-heading" className="text-lg font-semibold">Recently updated</h2>
+          <Link href="/admin/audit" className="text-sm text-primary underline-offset-4 hover:underline">Full audit log</Link>
+        </div>
+        {recent.length === 0 ? (
+          <p className="rounded-xl border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">Nothing has been changed yet.</p>
+        ) : (
+          <ul className="divide-y rounded-xl border bg-card">
+            {recent.map((e) => {
+              const d2 = describeAudit(e);
+              return (
+                <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+                  <span><span className="font-medium">{d2.label}</span>{d2.subject && <span className="text-muted-foreground"> · {d2.subject}</span>}</span>
+                  <span className="text-xs text-muted-foreground">{formatDate(e.created_at)}</span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
 
       {d.needsReview.length > 0 && (
         <section aria-labelledby="review-heading" className="space-y-3">

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ErrorMessage } from "@/components/common/error-message";
 import { StopEditList } from "@/components/admin/stop-edit-list";
+import { Pagination } from "@/components/admin/pagination";
+import { paginate, parsePage } from "@/lib/admin/pagination";
 import { loadDashboard } from "@/lib/admin/data";
 import { requireAdminPage } from "@/lib/admin/session";
 import { firstParam } from "@/lib/search-params";
@@ -14,7 +16,9 @@ export default async function AdminStopsPage({ searchParams }: PageProps<"/admin
   const ctx = await requireAdminPage();
   if (ctx.status !== "admin") return null;
   const params = await searchParams;
-  const suspectOnly = firstParam(params.filter) === "suspect";
+  const filterKey = firstParam(params.filter);
+  const suspectOnly = filterKey === "suspect";
+  const verifiedOnly = filterKey === "verified";
   const q = (firstParam(params.q) ?? "").trim().slice(0, 100).toLowerCase();
 
   let loaded;
@@ -26,9 +30,17 @@ export default async function AdminStopsPage({ searchParams }: PageProps<"/admin
   }
   const reasons = new Map(loaded.dashboard.suspectStops.map((s) => [s.id, REASON_LABEL[s.reason]]));
   const stops = loaded.stops
-    .filter((s) => (!suspectOnly || reasons.has(s.id)) && (!q || s.name.toLowerCase().includes(q)))
-    .sort((a, b) => a.name.localeCompare(b.name))
-    .slice(0, 200);
+    .filter((s) => (!suspectOnly || reasons.has(s.id)) && (!verifiedOnly || (s.verification_status === "verified" && !s.is_sample)) && (!q || s.name.toLowerCase().includes(q)))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  const page = paginate(stops, parsePage(firstParam(params.page)));
+  const pageHref = (p: number) => {
+    const qs = new URLSearchParams();
+    if (filterKey) qs.set("filter", filterKey);
+    if (q) qs.set("q", q);
+    if (p > 1) qs.set("page", String(p));
+    const text = qs.toString();
+    return `/admin/stops${text ? `?${text}` : ""}`;
+  };
 
   return (
     <div className="space-y-4">
@@ -37,21 +49,21 @@ export default async function AdminStopsPage({ searchParams }: PageProps<"/admin
         Stops are created in the route editor or by CSV import. Fix a wrong location here; a verified stop that changes goes back to unverified, along with every route that uses it.
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        {[["", "All stops"], ["suspect", "Incomplete coordinates"]].map(([key, label]) => (
+        {[["", "All stops"], ["verified", "Verified"], ["suspect", "Incomplete coordinates"]].map(([key, label]) => (
           <Link
             key={key}
             href={key ? `/admin/stops?filter=${key}` : "/admin/stops"}
-            aria-current={(key === "suspect") === suspectOnly ? "page" : undefined}
+            aria-current={(filterKey ?? "") === key ? "page" : undefined}
             className={cn(
               "inline-flex h-9 items-center rounded-full border px-3.5 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              (key === "suspect") === suspectOnly ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-accent",
+              (filterKey ?? "") === key ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-accent",
             )}
           >
             {label}
           </Link>
         ))}
         <form className="ml-auto" role="search">
-          {suspectOnly && <input type="hidden" name="filter" value="suspect" />}
+          {filterKey && <input type="hidden" name="filter" value={filterKey} />}
           <input
             type="search" name="q" defaultValue={q} placeholder="Search by name" aria-label="Search stops by name"
             className="h-9 w-56 rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -59,15 +71,16 @@ export default async function AdminStopsPage({ searchParams }: PageProps<"/admin
         </form>
       </div>
       <p aria-live="polite" className="text-sm text-muted-foreground">
-        {stops.length}{stops.length === 200 ? "+" : ""} {stops.length === 1 ? "stop" : "stops"}
+        {stops.length} {stops.length === 1 ? "stop" : "stops"}
       </p>
       <StopEditList
-        stops={stops.map((s) => ({
+        stops={page.items.map((s) => ({
           id: s.id, name: s.name, latitude: s.latitude, longitude: s.longitude, barangay: s.barangay ?? "",
           landmark: s.landmark_description ?? "", pickup: s.pickup_allowed, dropoff: s.dropoff_allowed,
           status: s.verification_status, isSample: s.is_sample, problem: reasons.get(s.id) ?? null,
         }))}
       />
+      <Pagination page={page} href={pageHref} />
     </div>
   );
 }

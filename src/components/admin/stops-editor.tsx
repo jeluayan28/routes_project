@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Trash2 } from "lucide-react";
 import { useEffect, useId, useState, useTransition } from "react";
 import { EditorMapLazy } from "@/components/admin/editor-map-lazy";
 import { Field, Notice, selectClass } from "@/components/admin/admin-ui";
+import { NearbyStops } from "@/components/admin/nearby-stops";
 import { VerificationBadge } from "@/components/common/verification-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,16 @@ import { cn } from "@/lib/utils";
 import type { Coordinate } from "@/lib/validation/transport";
 
 type DraftStop = DirectionDraft["stops"][number];
+
+/** Creates a stop; if one is already almost on the same spot, asks before creating another. */
+async function createStopConfirming(input: Parameters<typeof createStopAction>[0] & object) {
+  const res = await createStopAction(input);
+  if (!res.ok && res.fieldErrors?.nearby) {
+    if (!window.confirm(res.error)) return { ok: false, error: "No stop was created." } as const;
+    return createStopAction({ ...input, confirmNearby: true });
+  }
+  return res;
+}
 
 type Props = {
   routeKey: string;
@@ -253,7 +264,7 @@ function CoordinatesPanel({ onCreated }: { onCreated: (s: EditorStop) => void })
       setTouched(true);
       setError(null);
       if (!pair.ok || name.trim() === "") return;
-      const res = await createStopAction({ name, latitude: pair.coordinate.lat, longitude: pair.coordinate.lng, barangay, landmark: "", pickup: true, dropoff: true });
+      const res = await createStopConfirming({ name, latitude: pair.coordinate.lat, longitude: pair.coordinate.lng, barangay, landmark: "", pickup: true, dropoff: true });
       if (!res.ok) return setError(res.error);
       onCreated(res.data);
       setName("");
@@ -281,6 +292,7 @@ function CoordinatesPanel({ onCreated }: { onCreated: (s: EditorStop) => void })
         </Field>
       </div>
       {pair.ok && pair.warning && <Notice tone="warning">{pair.warning}</Notice>}
+      <NearbyStops point={pair.ok ? pair.coordinate : null} />
       <NewStopFields uid={uid} name={name} barangay={barangay} setName={setName} setBarangay={setBarangay} />
       {error && <Notice tone="error">{error}</Notice>}
       <Button type="submit" disabled={pending}>{pending ? "Creating…" : "Create stop and add it"}</Button>
@@ -310,7 +322,7 @@ function MapPanel({
     startTransition(async () => {
       setError(null);
       if (!point) return setError("Click the map to choose the stop's location first.");
-      const res = await createStopAction({ name, latitude: point.lat, longitude: point.lng, barangay, landmark: "", pickup: true, dropoff: true });
+      const res = await createStopConfirming({ name, latitude: point.lat, longitude: point.lng, barangay, landmark: "", pickup: true, dropoff: true });
       if (!res.ok) return setError(res.error);
       onCreated(res.data);
       setPoint(null);
@@ -337,6 +349,7 @@ function MapPanel({
         />
       </div>
       <Button type="button" variant="outline" size="sm" onClick={onFit}>Fit map to this route</Button>
+      <NearbyStops point={point} />
       <p aria-live="polite" className="text-sm">
         {point ? <>Chosen location: <strong>{point.lat}, {point.lng}</strong></> : "No location chosen yet."}
       </p>

@@ -8,7 +8,7 @@ import { firstParam } from "@/lib/search-params";
 
 export const metadata = { title: "Edit route" };
 
-const TABS: EditorTab[] = ["details", "stops", "geometry", "fares", "verify"];
+const TABS: EditorTab[] = ["details", "stops", "geometry", "fares", "preview", "verify"];
 
 export default async function EditRoutePage({ params, searchParams }: PageProps<"/admin/routes/[id]">) {
   const ctx = await requireAdminPage();

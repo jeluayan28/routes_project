@@ -5,6 +5,7 @@ import { useEffect, useId, useState, useTransition } from "react";
 import { FaresEditor } from "@/components/admin/fares-editor";
 import { GeometryEditor } from "@/components/admin/geometry-editor";
 import { Field, Notice, RouteBadges, selectClass, textareaClass } from "@/components/admin/admin-ui";
+import { RoutePreview } from "@/components/admin/route-preview";
 import { StopsEditor } from "@/components/admin/stops-editor";
 import { VerificationPanel } from "@/components/admin/verification-panel";
 import { Button } from "@/components/ui/button";
@@ -17,13 +18,14 @@ import { cn } from "@/lib/utils";
 import { vehicleTypeSchema } from "@/lib/validation/transport";
 import type { DirectionKind } from "@/lib/validation/route";
 
-export type EditorTab = "details" | "stops" | "geometry" | "fares" | "verify";
+export type EditorTab = "details" | "stops" | "geometry" | "fares" | "preview" | "verify";
 
 const TABS: { key: EditorTab; label: string; needsSaved?: boolean }[] = [
   { key: "details", label: "Details" },
   { key: "stops", label: "Directions & stops" },
   { key: "geometry", label: "Geometry" },
   { key: "fares", label: "Fares", needsSaved: true },
+  { key: "preview", label: "Preview" },
   { key: "verify", label: "Verification & status", needsSaved: true },
 ];
 
@@ -222,6 +224,8 @@ export function RouteEditor({ data, initialTab = "details" }: { data: EditorData
         {tab === "fares" && routeId && (
           <FaresEditor routeId={routeId} fares={fares} stops={fareStops} dirty={dirty} onChange={setFares} />
         )}
+
+        {tab === "preview" && <RoutePreview routeId={routeId} draft={draft} stops={stops} route={data?.route ?? null} dirty={dirty} />}
 
         {tab === "verify" && data && (
           <VerificationPanel

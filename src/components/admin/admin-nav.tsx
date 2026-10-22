@@ -10,6 +10,8 @@ const ITEMS = [
   { href: "/admin", label: "Dashboard", exact: true },
   { href: "/admin/routes", label: "Routes" },
   { href: "/admin/stops", label: "Stops" },
+  { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/audit", label: "Audit log" },
   { href: "/admin/import", label: "CSV import" },
 ] as const;
 

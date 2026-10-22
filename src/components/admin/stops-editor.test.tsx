@@ -11,6 +11,7 @@ const createStopAction = vi.fn();
 vi.mock("@/lib/admin/actions/routes", () => ({
   searchStopsAction: (...a: unknown[]) => searchStopsAction(...a),
   createStopAction: (...a: unknown[]) => createStopAction(...a),
+  nearbyStopsAction: async () => ({ ok: true, data: [] }),
 }));
 
 // The real map needs Leaflet; this stand-in lets a test "click" a chosen point.

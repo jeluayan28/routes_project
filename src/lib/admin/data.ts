@@ -1,4 +1,5 @@
 import { computeDashboard, type Dashboard } from "@/lib/admin/dashboard";
+import type { AuditEntry } from "@/lib/admin/audit";
 import type { AdminClient } from "@/lib/admin/session";
 import { fetchAll } from "@/lib/data/paginate";
 import type { RouteDraft } from "@/lib/admin/route-form";
@@ -14,16 +15,45 @@ export type FareRow = Tables["fare_rules"]["Row"];
 export type VerificationRow = Tables["route_verifications"]["Row"];
 export type BatchRow = Tables["import_batches"]["Row"];
 
-export async function loadDashboard(supabase: AdminClient): Promise<{ dashboard: Dashboard; routes: RouteRow[]; stops: StopRow[] }> {
-  const [routes, stops, fares, shapes, reports] = await Promise.all([
+export type ReportListItem = Pick<Tables["route_reports"]["Row"], "id" | "report_type" | "description" | "reporter_contact" | "status" | "created_at" | "updated_at" | "route_id" | "stop_id"> & { routeName: string | null; stopName: string | null };
+
+/** Public reports with the names of what they refer to. Reporter contact details are for administrators only. */
+export async function listReports(supabase: AdminClient): Promise<ReportListItem[]> {
+  const [reports, routes, stops] = await Promise.all([
+    fetchAll<Tables["route_reports"]["Row"]>((a, b) => supabase.from("route_reports").select("*").order("created_at", { ascending: false }).order("id").range(a, b)),
+    fetchAll<{ id: string; name: string }>((a, b) => supabase.from("routes").select("id, name").order("id").range(a, b)),
+    fetchAll<{ id: string; name: string }>((a, b) => supabase.from("stops").select("id, name").order("id").range(a, b)),
+  ]);
+  const routeNames = new Map(routes.map((r) => [r.id, r.name]));
+  const stopNames = new Map(stops.map((x) => [x.id, x.name]));
+  return reports.map((r) => ({
+    id: r.id, report_type: r.report_type, description: r.description, reporter_contact: r.reporter_contact, status: r.status,
+    created_at: r.created_at, updated_at: r.updated_at, route_id: r.route_id, stop_id: r.stop_id,
+    routeName: r.route_id ? (routeNames.get(r.route_id) ?? null) : null,
+    stopName: r.stop_id ? (stopNames.get(r.stop_id) ?? null) : null,
+  }));
+}
+
+/** The newest audit entries, optionally for one kind of record. */
+export async function listAudit(supabase: AdminClient, opts: { entity?: string; limit: number }): Promise<AuditEntry[]> {
+  let query = supabase.from("audit_logs").select("*").order("id", { ascending: false }).limit(opts.limit);
+  if (opts.entity) query = query.eq("entity_type", opts.entity);
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as AuditEntry[];
+}
+
+export async function loadDashboard(supabase: AdminClient): Promise<{ dashboard: Dashboard; routes: RouteRow[]; stops: StopRow[]; recent: AuditEntry[] }> {
+  const [routes, stops, fares, shapes, reports, recent] = await Promise.all([
     fetchAll<RouteRow>((a, b) => supabase.from("routes").select("*").order("id").range(a, b)),
     fetchAll<StopRow>((a, b) => supabase.from("stops").select("*").order("id").range(a, b)),
     fetchAll<Pick<FareRow, "route_id" | "verification_status" | "verified_at">>((a, b) =>
       supabase.from("fare_rules").select("route_id, verification_status, verified_at").order("id").range(a, b)),
     fetchAll<{ route_id: string; verification_status: "unverified" | "verified" | "outdated"; last_verified_at: string | null }>((a, b) =>
       supabase.from("route_shapes").select("route_id, verification_status, last_verified_at").order("id").range(a, b)),
-    fetchAll<{ route_id: string | null }>((a, b) =>
-      supabase.from("route_reports").select("route_id").in("status", ["new", "reviewing"]).order("id").range(a, b)),
+    fetchAll<{ route_id: string | null; status: string }>((a, b) =>
+      supabase.from("route_reports").select("route_id, status").in("status", ["new", "reviewing"]).order("id").range(a, b)),
+    listAudit(supabase, { limit: 10 }),
   ]);
 
   const dashboard = computeDashboard({
@@ -31,11 +61,12 @@ export async function loadDashboard(supabase: AdminClient): Promise<{ dashboard:
     routes,
     routeIdsWithFares: [...new Set(fares.map((f) => f.route_id))],
     openReportRouteIds: reports.flatMap((r) => (r.route_id ? [r.route_id] : [])),
+    pendingReports: reports.filter((r) => r.status === "new").length,
     stops,
     shapes,
     fares,
   });
-  return { dashboard, routes, stops };
+  return { dashboard, routes, stops, recent };
 }
 
 export type RouteListItem = RouteRow & { stopCount: number; fareCount: number };

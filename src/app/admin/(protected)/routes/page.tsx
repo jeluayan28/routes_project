@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ErrorMessage } from "@/components/common/error-message";
 import { RouteBadges, formatDate } from "@/components/admin/admin-ui";
+import { Pagination } from "@/components/admin/pagination";
+import { paginate, parsePage } from "@/lib/admin/pagination";
 import { buttonVariants } from "@/components/ui/button";
 import { REVIEW_REASON_LABEL } from "@/lib/admin/dashboard";
 import { listRoutes, loadDashboard } from "@/lib/admin/data";
@@ -13,10 +15,12 @@ export const metadata = { title: "Routes" };
 
 const FILTERS = [
   ["all", "All"],
+  ["active", "Active"],
   ["draft", "Draft"],
   ["verified", "Verified"],
   ["review", "Needs review"],
   ["nofares", "Missing fares"],
+  ["farereview", "Fares to verify"],
   ["outdated", "Outdated"],
   ["sample", "Sample"],
 ] as const;
@@ -27,6 +31,7 @@ export default async function AdminRoutesPage({ searchParams }: PageProps<"/admi
   const params = await searchParams;
   const filter = FILTERS.find(([key]) => key === firstParam(params.filter))?.[0] ?? "all";
   const batch = firstParam(params.batch);
+  const requestedPage = parsePage(firstParam(params.page));
 
   let routes, dashboard;
   try {
@@ -41,12 +46,15 @@ export default async function AdminRoutesPage({ searchParams }: PageProps<"/admi
     verified: new Set(dashboard.verified),
     review: new Map(dashboard.needsReview.map((r) => [r.id, r.reasons])),
     nofares: new Set(dashboard.missingFares),
+    farereview: new Set(dashboard.fareReviewRoutes),
     outdated: new Set(dashboard.outdated.routes),
   };
   const shown = routes.filter((r) => {
     if (batch && r.import_batch_id !== batch) return false;
     switch (filter) {
+      case "active": return r.status === "active" && !r.is_sample;
       case "draft": return ids.draft.has(r.id);
+      case "farereview": return ids.farereview.has(r.id);
       case "verified": return ids.verified.has(r.id);
       case "review": return ids.review.has(r.id);
       case "nofares": return ids.nofares.has(r.id);
@@ -55,6 +63,16 @@ export default async function AdminRoutesPage({ searchParams }: PageProps<"/admi
       default: return true;
     }
   });
+
+  const page = paginate(shown, requestedPage);
+  const pageHref = (p: number) => {
+    const q = new URLSearchParams();
+    if (filter !== "all") q.set("filter", filter);
+    if (batch) q.set("batch", batch);
+    if (p > 1) q.set("page", String(p));
+    const text = q.toString();
+    return `/admin/routes${text ? `?${text}` : ""}`;
+  };
 
   return (
     <div className="space-y-4">
@@ -108,7 +126,7 @@ export default async function AdminRoutesPage({ searchParams }: PageProps<"/admi
               </tr>
             </thead>
             <tbody className="divide-y">
-              {shown.map((r) => (
+              {page.items.map((r) => (
                 <tr key={r.id} className="align-top">
                   <td className="px-4 py-3">
                     <Link href={`/admin/routes/${r.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
@@ -131,6 +149,7 @@ export default async function AdminRoutesPage({ searchParams }: PageProps<"/admi
           </table>
         </div>
       )}
+      <Pagination page={page} href={pageHref} />
     </div>
   );
 }

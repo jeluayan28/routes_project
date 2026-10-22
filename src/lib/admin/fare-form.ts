@@ -40,3 +40,35 @@ export const fareInputSchema = z
   });
 
 export type FareInput = z.infer<typeof fareInputSchema>;
+
+/** A price change on an existing fare: the old rule is kept and ended the day before. */
+export const changeFareSchema = z.object({
+  fareId: z.uuid(),
+  amount: fareInputSchema.shape.amount,
+  effectiveFrom: isoDate,
+  source: z.string().trim().min(3, "Say where the new fare comes from.").max(300),
+});
+
+export const endFareSchema = z.object({ fareId: z.uuid(), effectiveUntil: isoDate });
+
+/**
+ * An existing fare that would share a price slot with this one on some day: same
+ * stops and passenger category, overlapping dates. The database refuses this too;
+ * checking here gives an immediate, specific message.
+ */
+export function findOverlap<
+  F extends { id: string; from_stop_id: string | null; to_stop_id: string | null; passenger_type: string; effective_from: string; effective_until: string | null },
+>(existing: readonly F[], fare: Pick<FareInput, "id" | "fromStopId" | "toStopId" | "passengerType" | "effectiveFrom" | "effectiveUntil">): F | null {
+  const until = fare.effectiveUntil || "9999-12-31";
+  return (
+    existing.find(
+      (f) =>
+        f.id !== fare.id &&
+        f.from_stop_id === fare.fromStopId &&
+        f.to_stop_id === fare.toStopId &&
+        f.passenger_type === fare.passengerType &&
+        f.effective_from <= until &&
+        fare.effectiveFrom <= (f.effective_until ?? "9999-12-31"),
+    ) ?? null
+  );
+}

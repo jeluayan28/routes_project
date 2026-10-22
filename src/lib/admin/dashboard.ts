@@ -15,6 +15,8 @@ export type DashboardInput = {
   routeIdsWithFares: readonly string[];
   /** Route ids with a report that is new or being reviewed. */
   openReportRouteIds: readonly string[];
+  /** Public reports nobody has looked at yet (status new). */
+  pendingReports?: number;
   stops: {
     id: string;
     latitude: number;
@@ -30,11 +32,21 @@ export type DashboardInput = {
 export type ReviewReason = "outdated" | "stale" | "open-report" | "active-unverified";
 
 export type Dashboard = {
+  /** The headline figures. Sample records are never counted. */
+  counts: {
+    activeRoutes: number;
+    draftRoutes: number;
+    verifiedStops: number;
+    faresNeedingVerification: number;
+    pendingReports: number;
+  };
   totals: { routes: number; stops: number; sampleRoutes: number };
   draft: string[];
   verified: string[];
   needsReview: { id: string; reasons: ReviewReason[] }[];
   missingFares: string[];
+  /** Routes with at least one fare that needs verification. */
+  fareReviewRoutes: string[];
   suspectStops: { id: string; reason: "placeholder" | "outside-area" | "invalid" }[];
   outdated: { routes: string[]; stops: string[]; shapes: number; fares: number };
 };
@@ -95,11 +107,25 @@ export function computeDashboard(input: DashboardInput): Dashboard {
     else if (!isInsideServiceArea({ lat: s.latitude, lng: s.longitude })) suspectStops.push({ id: s.id, reason: "outside-area" });
   }
 
+  const realIds = new Set(real.map((r) => r.id));
+  const fareNeedsVerification = (f: DashboardInput["fares"][number]) =>
+    realIds.has(f.route_id) && (f.verification_status !== "verified" || isStale(f.verified_at, now));
+  const counts: Dashboard["counts"] = {
+    activeRoutes: real.filter((r) => r.status === "active").length,
+    draftRoutes: real.filter((r) => r.status === "draft").length,
+    verifiedStops: input.stops.filter((x) => !x.is_sample && x.verification_status === "verified").length,
+    // A fare needs verification if it was never verified, was marked outdated, or its verification has gone stale.
+    faresNeedingVerification: input.fares.filter(fareNeedsVerification).length,
+    pendingReports: input.pendingReports ?? 0,
+  };
+
   return {
+    counts,
     totals: { routes: real.length, stops: input.stops.filter((s) => !s.is_sample).length, sampleRoutes: input.routes.length - real.length },
     draft: real.filter((r) => r.status === "draft").map((r) => r.id),
     verified: real.filter((r) => r.verification_status === "verified" && !isStale(r.last_verified_at, now)).map((r) => r.id),
     needsReview,
+    fareReviewRoutes: [...new Set(input.fares.filter(fareNeedsVerification).map((f) => f.route_id))],
     missingFares: real.filter((r) => !withFares.has(r.id)).map((r) => r.id),
     suspectStops,
     outdated: {

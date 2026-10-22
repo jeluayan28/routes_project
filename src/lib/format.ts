@@ -26,6 +26,14 @@ export function formatVerifiedDate(iso: string | null): string {
   return dateFormat.format(new Date(`${iso}T00:00:00Z`));
 }
 
+const pesoFormat = new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+/** The one way peso amounts are shown: ₱12.00, ₱1,234.50. Always two decimals. */
 export function formatPeso(amount: number): string {
-  return `₱${amount.toFixed(2)}`;
+  return pesoFormat.format(amount);
+}
+
+/** A timestamp or ISO date as a calendar date in Philippine time, e.g. "Jan 15, 2026". */
+export function formatFareDate(iso: string): string {
+  return new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "Asia/Manila" }).format(new Date(iso));
 }

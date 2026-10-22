@@ -1,6 +1,7 @@
 import { VEHICLE_LABEL } from "@/lib/format";
 import { VERIFICATION_STALE_AFTER_DAYS } from "@/lib/constants";
-import { toCentavos, fromCentavos } from "@/lib/search/fares";
+import { summarizeLegFares } from "@/lib/fares/calculator";
+import { toCentavos } from "@/lib/fares/money";
 import { sliceGeometry } from "@/lib/search/geometry";
 import {
   findCandidateStops,
@@ -13,7 +14,6 @@ import { compareJourneys, dominates } from "@/lib/search/rank";
 import {
   DEFAULT_SEARCH_OPTIONS,
   HARD_MAX_TRANSFERS,
-  type FareSummary,
   type Journey,
   type JourneyStep,
   type NoJourney,
@@ -514,17 +514,8 @@ class Search {
     }
 
     // Fares: a total only when every ridden segment has a known fare.
-    const missing = rides.flatMap((r) =>
-      r.fare.status === "unavailable" ? [{ routeId: r.routeId, routeName: r.routeName, reason: r.fare.reason }] : [],
-    );
-    const knownCentavos = rides.reduce((sum, r) => sum + (r.fare.status === "known" ? toCentavos(r.fare.amount) : 0), 0);
-    const fare: FareSummary =
-      missing.length === 0
-        ? {
-            status: "complete", currency: "PHP", total: fromCentavos(knownCentavos),
-            breakdown: rides.map((r) => ({ routeId: r.routeId, routeName: r.routeName, amount: r.fare.status === "known" ? r.fare.amount : 0 })),
-          }
-        : { status: "incomplete", currency: "PHP", knownSubtotal: fromCentavos(knownCentavos), missing };
+    const fare = summarizeLegFares(rides);
+    const missing = fare.status === "incomplete" ? fare.missing : [];
     if (missing.length > 0) notes.push(`No fare is available for: ${missing.map((m) => m.routeName).join(", ")}. A total cannot be given.`);
 
     if (anyEstimate) notes.push("Walking distances are estimates; the walking path itself is not verified.");

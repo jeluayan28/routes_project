@@ -3,7 +3,7 @@ import { isInsideServiceArea } from "@/lib/constants";
 import { parseCoordinate } from "@/lib/import/validate";
 import { parseLineGeometry } from "@/lib/routes/geometry";
 import { coordinateSchema, vehicleTypeSchema, type Coordinate } from "@/lib/validation/transport";
-import { directionKindSchema } from "@/lib/validation/route";
+import { directionKindSchema, type Route, type RouteDirection } from "@/lib/validation/route";
 
 // ---------------------------------------------------------------------------
 // Draft shape edited by the route editor and sent to the save action
@@ -199,4 +199,37 @@ function outsideWarning(lines: Coordinate[][]): string[] {
 /** Text form of lines, the inverse of parseGeometryText's plain format. */
 export function linesToText(lines: readonly (readonly Coordinate[])[]): string {
   return lines.map((l) => l.map((c) => `${round6(c.lat)}, ${round6(c.lng)}`).join("\n")).join("\n\n");
+}
+
+/**
+ * The public Route model for an unsaved or saved draft, so an administrator can
+ * see what visitors would see. Unknown stops are skipped, geometry is exactly
+ * what was drawn (never inferred from the stops), and a stop that "follows the
+ * stop's own setting" is shown as allowed because that setting is not in the draft.
+ */
+export function draftToRoute(
+  draft: RouteDraft,
+  stops: Readonly<Record<string, { id: string; name: string; latitude: number; longitude: number; status: "unverified" | "verified" | "outdated" }>>,
+  meta: { id: string; status: "unverified" | "verified" | "outdated" },
+): Route {
+  const directions: RouteDirection[] = draft.directions.map((d) => ({
+    kind: d.kind,
+    stops: d.stops.flatMap((s) => {
+      const known = stops[s.stopId];
+      return known
+        ? [{ id: known.id, name: known.name, position: { lat: known.latitude, lng: known.longitude }, status: known.status, canBoard: s.boarding ?? true, canAlight: s.dropoff ?? true }]
+        : [];
+    }),
+    paths: d.lines.map((line) => [...line]),
+  }));
+  return {
+    id: meta.id,
+    code: draft.code || draft.name,
+    name: draft.name || "Untitled route",
+    vehicleType: draft.transportType,
+    status: meta.status,
+    direction: directions.length > 1 ? "both" : "one-way",
+    directions,
+    fares: [],
+  };
 }
