@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+  import type { Metadata } from "next";
 import { Mail } from "lucide-react";
 import { VerificationNotice } from "@/components/common/verification-notice";
 import { buttonVariants } from "@/components/ui/button";
