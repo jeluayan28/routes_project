@@ -5,19 +5,20 @@ export type ReportType = Database["public"]["Enums"]["report_type"];
 
 /**
  * The database keeps `new | reviewing | resolved | rejected`. Administrators see
- * them as Pending, Reviewed, Resolved and Rejected.
+ * them as Pending, Reviewing, Resolved and Rejected.
  */
 export const REPORT_STATUSES: readonly ReportStatus[] = ["new", "reviewing", "resolved", "rejected"];
 
 export const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {
   new: "Pending",
-  reviewing: "Reviewed",
+  reviewing: "Reviewing",
   resolved: "Resolved",
   rejected: "Rejected",
 };
 
 export const REPORT_TYPE_LABEL: Record<ReportType, string> = {
   incorrect_route: "Incorrect route",
+  incorrect_direction: "Incorrect direction",
   incorrect_stop: "Incorrect stop",
   incorrect_fare: "Incorrect fare",
   missing_route: "Missing route",

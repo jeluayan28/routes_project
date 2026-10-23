@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeftRight, ArrowRight, Receipt } from "lucide-react";
+import { LastVerified } from "@/components/common/last-verified";
 import { VerificationBadge } from "@/components/common/verification-badge";
 import { FareBadge } from "@/components/fares/fare-badge";
 import { ReportLink } from "@/components/reports/report-link";
@@ -44,6 +45,7 @@ export function RouteDetailsPanel({
           {route.name}
         </Heading>
         <VerificationBadge status={route.status} />
+        {route.status !== "sample" && <LastVerified at={route.lastVerifiedAt} />}
       </header>
 
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -111,7 +113,7 @@ export function RouteDetailsPanel({
             View full details
           </Link>
         )}
-        <ReportLink subject={`${route.code} ${route.name}`} />
+        <ReportLink type="incorrect_route" routeId={route.id} />
       </div>
     </div>
   );

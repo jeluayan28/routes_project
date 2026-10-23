@@ -78,7 +78,7 @@ describe("audit descriptions", () => {
 
   it("names report triage, and marks other records as not significant", () => {
     expect(d({ entity_type: "route_reports", changes: { status: "resolved" }, previous: { status: "new" } }).label).toBe("Report marked resolved");
-    expect(d({ entity_type: "route_reports", changes: { status: "reviewing" }, previous: { status: "new" } }).label).toBe("Report marked reviewed");
+    expect(d({ entity_type: "route_reports", changes: { status: "reviewing" }, previous: { status: "new" } }).label).toBe("Report marked reviewing");
     expect(d({ entity_type: "stops", action: "insert" })).toMatchObject({ label: "Stop created", significant: false });
   });
 
@@ -94,7 +94,7 @@ describe("audit descriptions", () => {
 
 describe("reports", () => {
   it("shows the four workflow states under their administrator names", () => {
-    expect(REPORT_STATUSES.map((s) => REPORT_STATUS_LABEL[s])).toEqual(["Pending", "Reviewed", "Resolved", "Rejected"]);
+    expect(REPORT_STATUSES.map((s) => REPORT_STATUS_LABEL[s])).toEqual(["Pending", "Reviewing", "Resolved", "Rejected"]);
   });
   it("treats pending and reviewed as open", () => {
     expect(REPORT_STATUSES.filter(isOpenReport)).toEqual(["new", "reviewing"]);

@@ -13,7 +13,7 @@ type StopRow = Pick<
 export type RouteRow = Pick<
   Tables["routes"]["Row"],
   "id" | "code" | "name" | "transport_type" | "verification_status"
-> & {
+> & Partial<Pick<Tables["routes"]["Row"], "last_verified_at">> & {
   route_stops: Array<
     Pick<Tables["route_stops"]["Row"], "direction" | "stop_order" | "boarding_allowed" | "dropoff_allowed"> & {
       /** PostgREST returns null if the stop row is not visible to the caller. */
@@ -74,6 +74,7 @@ export function buildRoutes(routeRows: readonly RouteRow[], shapeRows: readonly 
       name: row.name,
       vehicleType: row.transport_type,
       status: row.verification_status,
+      lastVerifiedAt: row.last_verified_at ?? null,
       direction: directions.length > 1 ? "both" : "one-way",
       directions,
       fares: [],

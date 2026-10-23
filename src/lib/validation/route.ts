@@ -58,6 +58,8 @@ export const routeSchema = z.object({
   name: z.string(),
   vehicleType: vehicleTypeSchema,
   status: verificationStatusSchema,
+  /** When an administrator last verified the route (ISO timestamp); null if never or unknown. */
+  lastVerifiedAt: z.string().nullable().optional(),
   /** "one-way" when only an outbound direction is recorded. */
   direction: z.enum(["both", "one-way"]),
   directionNote: z.string().optional(),

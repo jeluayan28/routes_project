@@ -26,6 +26,7 @@ export function VerificationPanel({ route, verifications, dirty, onChanged, onDe
   const [verifiedOn, setVerifiedOn] = useState(today);
   const [source, setSource] = useState("");
   const [notes, setNotes] = useState("");
+  const [reason, setReason] = useState("");
   const [message, setMessage] = useState<{ tone: "error" | "success" | "info"; text: string } | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -51,7 +52,7 @@ export function VerificationPanel({ route, verifications, dirty, onChanged, onDe
 
   const setStatus = (next: "draft" | "active" | "inactive") =>
     run(async () => {
-      const res = await setRouteStatusAction(route.id, next);
+      const res = await setRouteStatusAction(route.id, next, reason);
       return res.ok ? { ok: true } : res;
     }, `Status set to ${next}.`);
 
@@ -66,9 +67,17 @@ export function VerificationPanel({ route, verifications, dirty, onChanged, onDe
         </Notice>
         {message && <Notice tone={message.tone}>{message.text}</Notice>}
 
+        {route.status === "inactive" && route.deactivation_reason && (
+          <Notice tone="warning">Deactivated{route.deactivated_at ? ` on ${formatDate(route.deactivated_at)}` : ""}: {route.deactivation_reason}</Notice>
+        )}
+        {route.status !== "inactive" && (
+          <Field id={`${uid}-reason`} label="Reason for deactivating (required to set inactive)" hint="Use this to take a route offline while it is known or suspected to be inaccurate, for example after a report. Reactivating clears it.">
+            <Input id={`${uid}-reason`} value={reason} maxLength={500} onChange={(e) => setReason(e.target.value)} />
+          </Field>
+        )}
         <div className="flex flex-wrap gap-2">
           {(["active", "inactive", "draft"] as const).map((s) => (
-            <Button key={s} type="button" variant={route.status === s ? "default" : "outline"} disabled={pending || route.status === s} onClick={() => setStatus(s)}>
+            <Button key={s} type="button" variant={route.status === s ? "default" : "outline"} disabled={pending || route.status === s || (s === "inactive" && reason.trim().length < 3)} onClick={() => setStatus(s)}>
               {route.status === s ? `Currently ${s}` : `Set ${s}`}
             </Button>
           ))}

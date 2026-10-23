@@ -1,5 +1,6 @@
   import type { Metadata } from "next";
 import { Mail } from "lucide-react";
+import { ReportLink } from "@/components/reports/report-link";
 import { VerificationNotice } from "@/components/common/verification-notice";
 import { buttonVariants } from "@/components/ui/button";
 import { getContactEmail } from "@/lib/data/config";
@@ -44,10 +45,15 @@ export default function AboutPage() {
 
       <section id="report" aria-labelledby="report-heading" className="scroll-mt-20 space-y-3">
         <h2 id="report-heading" className="text-xl font-semibold">Report incorrect information</h2>
-        {email ? (
+        <p>
+          Found a wrong fare, a missing stop, or a route that no longer runs? Use the report form. You don&apos;t need an account, and nothing changes until an
+          administrator has checked your report.
+        </p>
+        <ReportLink />
+        {email && (
           <>
             <p>
-              Found a wrong fare, a missing stop, or a route that no longer runs? Tell us which route
+              You can also write to us. Tell us which route
               and what should change.
             </p>
             <a href={`mailto:${email}?subject=${encodeURIComponent("Correction: Butuan Route Finder")}`} className={buttonVariants()}>
@@ -55,11 +61,6 @@ export default function AboutPage() {
               Email {email}
             </a>
           </>
-        ) : (
-          <p className="rounded-lg border border-dashed px-3 py-3 text-sm text-muted-foreground">
-            A contact address for corrections has not been set up yet. An in-app report form is
-            planned.
-          </p>
         )}
       </section>
     </div>

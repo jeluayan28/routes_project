@@ -30,7 +30,7 @@ const data = (over: Partial<EditorData> = {}): EditorData => ({
   routeId: ID,
   route: {
     id: ID, code: "T-1", name: "Existing Route", transport_type: "jeepney", description: null, origin_label: "A", destination_label: "B",
-    status: "draft", verification_status: "unverified", last_verified_at: null, is_sample: false, import_batch_id: null,
+    status: "draft", verification_status: "unverified", last_verified_at: null, is_sample: false, import_batch_id: null, deactivation_reason: null, deactivated_at: null,
     created_at: "2026-01-01T00:00:00Z", updated_at: "2026-01-01T00:00:00Z",
   },
   draft: {

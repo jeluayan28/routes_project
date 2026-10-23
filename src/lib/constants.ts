@@ -21,5 +21,17 @@ export function isInsideServiceArea(c: Coordinate): boolean {
   return c.lat >= b.south && c.lat <= b.north && c.lng >= b.west && c.lng <= b.east;
 }
 
-/** A verification older than this is treated as stale and needs review. */
-export const VERIFICATION_STALE_AFTER_DAYS = 180;
+export const DEFAULT_VERIFICATION_STALE_DAYS = 180;
+
+/** A whole number of days from 1 to 3650; anything else falls back to the default. */
+export function parseStaleDays(raw: string | undefined): number {
+  const n = Number(raw);
+  return raw !== undefined && raw.trim() !== "" && Number.isInteger(n) && n >= 1 && n <= 3650 ? n : DEFAULT_VERIFICATION_STALE_DAYS;
+}
+
+/**
+ * A verification older than this is treated as stale and needs review. Set
+ * NEXT_PUBLIC_VERIFICATION_STALE_DAYS to change it (it is public so the server
+ * and the browser agree; it is not a secret).
+ */
+export const VERIFICATION_STALE_AFTER_DAYS = parseStaleDays(process.env.NEXT_PUBLIC_VERIFICATION_STALE_DAYS);

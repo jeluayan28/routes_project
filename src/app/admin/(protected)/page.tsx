@@ -52,6 +52,7 @@ export default async function AdminDashboardPage() {
         <div className="flex gap-2">
           <Link href="/admin/routes/new" className={buttonVariants()}>New route</Link>
           <Link href="/admin/import" className={buttonVariants({ variant: "outline" })}>Import CSV</Link>
+          <Link href="/admin/quality" className={buttonVariants({ variant: "outline" })}>Data quality</Link>
         </div>
       </div>
 

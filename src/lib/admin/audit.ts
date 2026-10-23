@@ -37,7 +37,7 @@ const ENTITY_NOUN: Record<string, string> = {
   landmarks: "Landmark",
 };
 
-const REPORT_STATUS_LABEL: Record<string, string> = { new: "pending", reviewing: "reviewed", resolved: "resolved", rejected: "rejected" };
+const REPORT_STATUS_LABEL: Record<string, string> = { new: "pending", reviewing: "reviewing", resolved: "resolved", rejected: "rejected" };
 
 const str = (v: unknown) => (typeof v === "string" ? v : null);
 

@@ -20,7 +20,7 @@ vi.mock("@/lib/admin/actions/routes", () => ({
 const ID = "00000000-0000-4000-8000-0000000000aa";
 const route = (over: Partial<RouteRow> = {}): RouteRow => ({
   id: ID, code: null, name: "Test Route", transport_type: "jeepney", description: null, origin_label: "A", destination_label: "B",
-  status: "draft", verification_status: "unverified", last_verified_at: null, is_sample: false, import_batch_id: null,
+  status: "draft", verification_status: "unverified", last_verified_at: null, is_sample: false, import_batch_id: null, deactivation_reason: null, deactivated_at: null,
   created_at: "2026-01-01T00:00:00Z", updated_at: "2026-01-01T00:00:00Z", ...over,
 });
 
@@ -139,8 +139,18 @@ describe("visibility", () => {
     const { onChanged } = setup();
     await userEvent.click(screen.getByRole("button", { name: "Set active" }));
     await waitFor(() => expect(onChanged).toHaveBeenCalled());
-    expect(setRouteStatusAction).toHaveBeenCalledWith(ID, "active");
+    expect(setRouteStatusAction).toHaveBeenCalledWith(ID, "active", "");
     expect(screen.getByRole("button", { name: "Currently draft" })).toBeDisabled();
+  });
+
+  it("will not deactivate a route without a reason, and sends the reason when given", async () => {
+    setRouteStatusAction.mockResolvedValue({ ok: true, data: { status: "inactive", public: false, reason: "x" } });
+    const { onChanged } = setup(route({ status: "active", verification_status: "verified", last_verified_at: new Date().toISOString() }));
+    expect(screen.getByRole("button", { name: "Set inactive" })).toBeDisabled();
+    await userEvent.type(screen.getByLabelText(/reason for deactivating/i), "Reported as inaccurate");
+    await userEvent.click(screen.getByRole("button", { name: "Set inactive" }));
+    await waitFor(() => expect(onChanged).toHaveBeenCalled());
+    expect(setRouteStatusAction).toHaveBeenCalledWith(ID, "inactive", "Reported as inaccurate");
   });
 
   it("lets a verified route be marked outdated, after confirmation", async () => {

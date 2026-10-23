@@ -1,29 +1,34 @@
 import Link from "next/link";
 import { Flag } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
-import { getContactEmail } from "@/lib/data/config";
+import type { PublicReportType } from "@/lib/reports/schema";
 import { cn } from "@/lib/utils";
 
 /**
- * "Report incorrect information" action. Until an in-app report form exists it
- * opens an email to the configured contact; if none is configured it points to
- * the About page, which explains that. It is always a working link.
+ * "Report incorrect information": opens the report form, pre-filled with what the
+ * visitor was looking at. No account is needed.
  */
-export function ReportLink({ subject, className }: { subject: string; className?: string }) {
-  const email = getContactEmail();
-  const classes = cn(buttonVariants({ variant: "outline" }), className);
-
-  if (email) {
-    const href = `mailto:${email}?subject=${encodeURIComponent(`Correction: ${subject}`)}`;
-    return (
-      <a href={href} className={classes}>
-        <Flag aria-hidden="true" />
-        Report incorrect information
-      </a>
-    );
-  }
+export function ReportLink({
+  type,
+  routeId,
+  stopId,
+  direction,
+  className,
+}: {
+  type?: PublicReportType;
+  routeId?: string;
+  stopId?: string;
+  direction?: "outbound" | "inbound";
+  className?: string;
+}) {
+  const q = new URLSearchParams();
+  if (type) q.set("type", type);
+  if (routeId) q.set("route", routeId);
+  if (stopId) q.set("stop", stopId);
+  if (direction) q.set("direction", direction);
+  const query = q.toString();
   return (
-    <Link href="/about#report" className={classes}>
+    <Link href={`/report${query ? `?${query}` : ""}`} className={cn(buttonVariants({ variant: "outline" }), className)}>
       <Flag aria-hidden="true" />
       Report incorrect information
     </Link>

@@ -116,10 +116,7 @@ export function TripFare({ journey, category }: { journey: Journey; category: Fa
 
       {fare.sample && <p className="mt-2 text-xs">Sample data: these are not real Butuan fares.</p>}
       <div className="mt-2">
-        <ReportLink
-          subject={`Incorrect fare (${label}) ${first?.boardingStopName ?? ""} to ${fare.segments[fare.segments.length - 1]?.dropoffStopName ?? ""}`.trim()}
-          className="h-7 text-xs"
-        />
+        <ReportLink type="incorrect_fare" routeId={first?.routeId} className="h-7 text-xs" />
       </div>
     </section>
   );

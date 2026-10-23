@@ -1,5 +1,8 @@
 import { computeDashboard, type Dashboard } from "@/lib/admin/dashboard";
 import type { AuditEntry } from "@/lib/admin/audit";
+import type { QualityInput } from "@/lib/admin/quality";
+import type { InspectionInput } from "@/lib/admin/report-inspection";
+import { todayInManila } from "@/lib/dates";
 import type { AdminClient } from "@/lib/admin/session";
 import { fetchAll } from "@/lib/data/paginate";
 import type { RouteDraft } from "@/lib/admin/route-form";
@@ -15,7 +18,7 @@ export type FareRow = Tables["fare_rules"]["Row"];
 export type VerificationRow = Tables["route_verifications"]["Row"];
 export type BatchRow = Tables["import_batches"]["Row"];
 
-export type ReportListItem = Pick<Tables["route_reports"]["Row"], "id" | "report_type" | "description" | "reporter_contact" | "status" | "created_at" | "updated_at" | "route_id" | "stop_id"> & { routeName: string | null; stopName: string | null };
+export type ReportListItem = Pick<Tables["route_reports"]["Row"], "id" | "report_type" | "description" | "reporter_contact" | "status" | "created_at" | "updated_at" | "route_id" | "stop_id" | "resolution_note" | "direction"> & { routeName: string | null; stopName: string | null };
 
 /** Public reports with the names of what they refer to. Reporter contact details are for administrators only. */
 export async function listReports(supabase: AdminClient): Promise<ReportListItem[]> {
@@ -29,6 +32,7 @@ export async function listReports(supabase: AdminClient): Promise<ReportListItem
   return reports.map((r) => ({
     id: r.id, report_type: r.report_type, description: r.description, reporter_contact: r.reporter_contact, status: r.status,
     created_at: r.created_at, updated_at: r.updated_at, route_id: r.route_id, stop_id: r.stop_id,
+    resolution_note: r.resolution_note, direction: r.direction,
     routeName: r.route_id ? (routeNames.get(r.route_id) ?? null) : null,
     stopName: r.stop_id ? (stopNames.get(r.stop_id) ?? null) : null,
   }));
@@ -197,4 +201,53 @@ export async function searchStops(supabase: AdminClient, query: string, limit = 
   const { data, error } = await supabase.from("stops").select("*").ilike("name", `%${term}%`).order("name").limit(limit);
   if (error) throw new Error(error.message);
   return (data ?? []).map(toEditorStop);
+}
+
+/** Everything needed to compare one report with the records it is about. */
+export async function loadReportDetail(supabase: AdminClient, id: string): Promise<{ report: Tables["route_reports"]["Row"]; inspection: InspectionInput } | null> {
+  const { data: report, error } = await supabase.from("route_reports").select("*").eq("id", id).maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!report) return null;
+
+  const [route, stop, links, shapes, fares, stopUse, siblings] = await Promise.all([
+    report.route_id ? supabase.from("routes").select("*").eq("id", report.route_id).maybeSingle() : null,
+    report.stop_id ? supabase.from("stops").select("*").eq("id", report.stop_id).maybeSingle() : null,
+    report.route_id ? supabase.from("route_stops").select("direction, stop_order, stops(name)").eq("route_id", report.route_id) : null,
+    report.route_id ? supabase.from("route_shapes").select("direction, verification_status").eq("route_id", report.route_id) : null,
+    report.route_id ? supabase.from("fare_rules").select("passenger_type, amount, effective_from, effective_until, verification_status, source_description, from_stop_id").eq("route_id", report.route_id) : null,
+    report.stop_id ? supabase.from("route_stops").select("route_id").eq("stop_id", report.stop_id) : null,
+    report.stop_id
+      ? supabase.from("route_reports").select("id", { count: "exact", head: true }).eq("stop_id", report.stop_id).in("status", ["new", "reviewing"]).neq("id", id)
+      : report.route_id
+        ? supabase.from("route_reports").select("id", { count: "exact", head: true }).eq("route_id", report.route_id).in("status", ["new", "reviewing"]).neq("id", id)
+        : null,
+  ]);
+  for (const r of [route, stop, links, shapes, fares, stopUse, siblings]) if (r?.error) throw new Error(r.error.message);
+
+  return {
+    report,
+    inspection: {
+      today: todayInManila(),
+      report,
+      route: route?.data ?? null,
+      routeStops: (links?.data ?? []).map((l) => ({ direction: l.direction, stop_order: l.stop_order, name: (l.stops as unknown as { name: string } | null)?.name ?? "Unknown stop" })),
+      shapes: shapes?.data ?? [],
+      fares: fares?.data ?? [],
+      stop: stop?.data ?? null,
+      stopRouteCount: new Set((stopUse?.data ?? []).map((x) => x.route_id)).size,
+      otherOpenReports: siblings?.count ?? 0,
+    },
+  };
+}
+
+/** Everything the data-quality page needs, read as an administrator. */
+export async function loadQuality(supabase: AdminClient): Promise<QualityInput> {
+  const [routes, routeStops, shapes, fares, stops] = await Promise.all([
+    fetchAll<QualityInput["routes"][number]>((a, b) => supabase.from("routes").select("id, name, code, status, verification_status, last_verified_at, is_sample").order("id").range(a, b)),
+    fetchAll<QualityInput["routeStops"][number]>((a, b) => supabase.from("route_stops").select("route_id, direction, stop_order").order("route_id").order("direction").order("stop_order").range(a, b)),
+    fetchAll<QualityInput["shapes"][number]>((a, b) => supabase.from("route_shapes").select("route_id, direction, verification_status").order("id").range(a, b)),
+    fetchAll<QualityInput["fares"][number]>((a, b) => supabase.from("fare_rules").select("route_id, effective_from, effective_until, verification_status, verified_at").order("id").range(a, b)),
+    fetchAll<QualityInput["stops"][number]>((a, b) => supabase.from("stops").select("id, name, latitude, longitude, verification_status, last_verified_at, is_sample").order("id").range(a, b)),
+  ]);
+  return { now: new Date(), today: todayInManila(), routes, routeStops, shapes, fares, stops };
 }

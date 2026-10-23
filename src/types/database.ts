@@ -106,14 +106,14 @@ isOneToOne: false
                   ]
                 },"route_reports": {
                   Row: {
-                    "created_at": string,"description": string,"id": string,"report_type": Database["public"]['Enums']["report_type"],"reporter_contact": string | null,"route_id": string | null,"status": Database["public"]['Enums']["report_status"],"stop_id": string | null,"updated_at": string
+                    "created_at": string,"description": string,"direction": Database["public"]['Enums']["route_direction"] | null,"resolution_note": string | null,"resolved_at": string | null,"resolved_by": string | null,"id": string,"report_type": Database["public"]['Enums']["report_type"],"reporter_contact": string | null,"route_id": string | null,"status": Database["public"]['Enums']["report_status"],"stop_id": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"description": string,"id"?: string,"report_type": Database["public"]['Enums']["report_type"],"reporter_contact"?: string | null,"route_id"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"stop_id"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"description": string,"direction"?: Database["public"]['Enums']["route_direction"] | null,"resolution_note"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"id"?: string,"report_type": Database["public"]['Enums']["report_type"],"reporter_contact"?: string | null,"route_id"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"stop_id"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "created_at"?: string,"description"?: string,"id"?: string,"report_type"?: Database["public"]['Enums']["report_type"],"reporter_contact"?: string | null,"route_id"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"stop_id"?: string | null,"updated_at"?: string
+                    "created_at"?: string,"description"?: string,"direction"?: Database["public"]['Enums']["route_direction"] | null,"resolution_note"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"id"?: string,"report_type"?: Database["public"]['Enums']["report_type"],"reporter_contact"?: string | null,"route_id"?: string | null,"status"?: Database["public"]['Enums']["report_status"],"stop_id"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -178,14 +178,14 @@ isOneToOne: false
                   ]
                 },"routes": {
                   Row: {
-                    "code": string | null,"created_at": string,"description": string | null,"destination_label": string | null,"id": string,"last_verified_at": string | null,"name": string,"origin_label": string | null,"status": Database["public"]['Enums']["route_status"],"transport_type": Database["public"]['Enums']["transport_type"],"updated_at": string,"verification_status": Database["public"]['Enums']["verification_status"],"import_batch_id": string | null,"is_sample": boolean
+                    "code": string | null,"created_at": string,"deactivated_at": string | null,"deactivation_reason": string | null,"description": string | null,"destination_label": string | null,"id": string,"last_verified_at": string | null,"name": string,"origin_label": string | null,"status": Database["public"]['Enums']["route_status"],"transport_type": Database["public"]['Enums']["transport_type"],"updated_at": string,"verification_status": Database["public"]['Enums']["verification_status"],"import_batch_id": string | null,"is_sample": boolean
                   }
                   ComputedFields: never
                   Insert: {
-                    "code"?: string | null,"created_at"?: string,"description"?: string | null,"destination_label"?: string | null,"id"?: string,"last_verified_at"?: string | null,"name": string,"origin_label"?: string | null,"status"?: Database["public"]['Enums']["route_status"],"transport_type": Database["public"]['Enums']["transport_type"],"updated_at"?: string,"verification_status"?: Database["public"]['Enums']["verification_status"],"import_batch_id"?: string | null,"is_sample"?: boolean
+                    "code"?: string | null,"created_at"?: string,"deactivated_at"?: string | null,"deactivation_reason"?: string | null,"description"?: string | null,"destination_label"?: string | null,"id"?: string,"last_verified_at"?: string | null,"name": string,"origin_label"?: string | null,"status"?: Database["public"]['Enums']["route_status"],"transport_type": Database["public"]['Enums']["transport_type"],"updated_at"?: string,"verification_status"?: Database["public"]['Enums']["verification_status"],"import_batch_id"?: string | null,"is_sample"?: boolean
                   }
                   Update: {
-                    "code"?: string | null,"created_at"?: string,"description"?: string | null,"destination_label"?: string | null,"id"?: string,"last_verified_at"?: string | null,"name"?: string,"origin_label"?: string | null,"status"?: Database["public"]['Enums']["route_status"],"transport_type"?: Database["public"]['Enums']["transport_type"],"updated_at"?: string,"verification_status"?: Database["public"]['Enums']["verification_status"],"import_batch_id"?: string | null,"is_sample"?: boolean
+                    "code"?: string | null,"created_at"?: string,"deactivated_at"?: string | null,"deactivation_reason"?: string | null,"description"?: string | null,"destination_label"?: string | null,"id"?: string,"last_verified_at"?: string | null,"name"?: string,"origin_label"?: string | null,"status"?: Database["public"]['Enums']["route_status"],"transport_type"?: Database["public"]['Enums']["transport_type"],"updated_at"?: string,"verification_status"?: Database["public"]['Enums']["verification_status"],"import_batch_id"?: string | null,"is_sample"?: boolean
                   }
                   Relationships: [
     {
@@ -248,6 +248,7 @@ isOneToOne: false
             is_current_user_admin: { Args: never; Returns: boolean }
             change_fare: { Args: { p_amount: number; p_effective_from: string; p_fare_id: string; p_source: string }; Returns: string }
             end_fare: { Args: { p_effective_until: string; p_fare_id: string }; Returns: undefined }
+            set_report_status: { Args: { p_note?: string; p_report_id: string; p_status: Database["public"]['Enums']["report_status"] }; Returns: undefined }
             save_route: { Args: { p_data: Json; p_route_id: string }; Returns: string }
             verify_route: {
               Args: { p_checks: Json; p_notes?: string; p_route_id: string; p_source: string; p_verified_on: string }
@@ -255,7 +256,7 @@ isOneToOne: false
             }
           }
           Enums: {
-            "audit_action": "insert"|"update"|"delete","passenger_type": "regular"|"student"|"senior"|"pwd","report_status": "new"|"reviewing"|"resolved"|"rejected","report_type": "incorrect_route"|"incorrect_stop"|"incorrect_fare"|"missing_route"|"missing_stop"|"other","route_direction": "outbound"|"inbound","route_status": "draft"|"active"|"inactive","transport_type": "jeepney"|"multicab","verification_status": "unverified"|"verified"|"outdated"
+            "audit_action": "insert"|"update"|"delete","passenger_type": "regular"|"student"|"senior"|"pwd","report_status": "new"|"reviewing"|"resolved"|"rejected","report_type": "incorrect_route"|"incorrect_direction"|"incorrect_stop"|"incorrect_fare"|"missing_route"|"missing_stop"|"other","route_direction": "outbound"|"inbound","route_status": "draft"|"active"|"inactive","transport_type": "jeepney"|"multicab","verification_status": "unverified"|"verified"|"outdated"
           }
           CompositeTypes: {
             [_ in never]: never

@@ -54,7 +54,7 @@ async function route() {
 }
 
 const report = (routeId: string | null = null, contact: string | null = "secret@example.test") =>
-  q("insert into public.route_reports (route_id, report_type, description, reporter_contact) values ($1, 'incorrect_fare', 'The fare shown is wrong for this route.', $2) returning id", [routeId, contact]).then((r) => r.rows[0].id as string);
+  q("insert into public.route_reports (route_id, report_type, description, reporter_contact) values ($1, $3, 'The fare shown is wrong for this route.', $2) returning id", [routeId, contact, routeId ? "incorrect_fare" : "other"]).then((r) => r.rows[0].id as string);
 
 describe("who is an administrator", () => {
   it("is decided by the allow-list, not by the caller", async () => {
@@ -149,14 +149,17 @@ describe("public reports", () => {
     expect(rows).toHaveLength(1);
   });
 
-  it("can be triaged by an administrator, only the status column", async () => {
+  it("can be triaged by an administrator, only through set_report_status", async () => {
     const id = await report();
-    for (const status of ["reviewing", "resolved", "rejected", "new"]) {
-      await asAdmin(() => q("update public.route_reports set status=$2 where id=$1", [id, status]));
-      expect((await q("select status from public.route_reports where id=$1", [id])).rows[0].status).toBe(status);
-    }
-    await expect(asAdmin(() => q("update public.route_reports set description='rewritten by admin' where id=$1", [id]))).rejects.toThrow(/permission denied/);
-    await expect(asAdmin(() => q("update public.route_reports set reporter_contact='x' where id=$1", [id]))).rejects.toThrow(/permission denied/);
+    const set = (status: string, note: string | null = null) => asAdmin(() => q("select public.set_report_status($1, $2, $3)", [id, status, note]));
+    await set("reviewing");
+    await set("resolved", "Fixed the stop name");
+    expect((await q("select status, resolution_note n, resolved_by b, resolved_at is not null t from public.route_reports where id=$1", [id])).rows[0]).toEqual({ status: "resolved", n: "Fixed the stop name", b: admin, t: true });
+    await set("new");
+    expect((await q("select status, resolved_by b, resolved_at t from public.route_reports where id=$1", [id])).rows[0]).toEqual({ status: "new", b: null, t: null });
+    // Direct updates are not allowed at all, so a resolution can never go unrecorded.
+    await expect(asAdmin(() => q("update public.route_reports set status='resolved' where id=$1", [id]))).rejects.toThrow(/permission denied/);
+    await expect(asAdmin(() => q("update public.route_reports set description='rewritten' where id=$1", [id]))).rejects.toThrow(/permission denied/);
   });
 });
 
@@ -180,7 +183,7 @@ describe("audit log", () => {
 
   it("records who triaged a report and what the status was before, without the reporter's contact", async () => {
     const id = await report(null, "audit-secret@example.test");
-    await asAdmin(() => q("update public.route_reports set status='resolved' where id=$1", [id]));
+    await asAdmin(() => q("select public.set_report_status($1, 'resolved', 'Checked and fixed')", [id]));
     const log = (await q("select admin_id, action, changes, previous from public.audit_logs where entity_type='route_reports' and entity_id=$1", [id])).rows;
     expect(log).toHaveLength(1);
     expect(log[0]).toMatchObject({ admin_id: admin, action: "update", previous: { status: "new" } });

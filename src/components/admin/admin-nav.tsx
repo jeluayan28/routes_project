@@ -11,6 +11,7 @@ const ITEMS = [
   { href: "/admin/routes", label: "Routes" },
   { href: "/admin/stops", label: "Stops" },
   { href: "/admin/reports", label: "Reports" },
+  { href: "/admin/quality", label: "Data quality" },
   { href: "/admin/audit", label: "Audit log" },
   { href: "/admin/import", label: "CSV import" },
 ] as const;

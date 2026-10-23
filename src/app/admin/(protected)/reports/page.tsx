@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ErrorMessage } from "@/components/common/error-message";
 import { formatDate } from "@/components/admin/admin-ui";
 import { Pagination } from "@/components/admin/pagination";
-import { ReportStatusControl } from "@/components/admin/report-status-control";
+import { buttonVariants } from "@/components/ui/button";
 import { listReports } from "@/lib/admin/data";
 import { PAGE_SIZE, paginate, parsePage } from "@/lib/admin/pagination";
 import { REPORT_STATUS_LABEL, REPORT_TYPE_LABEL, REPORT_STATUSES, isOpenReport, parseReportStatus } from "@/lib/admin/reports";
@@ -95,7 +95,10 @@ export default async function AdminReportsPage({ searchParams }: PageProps<"/adm
                 {r.stopName && <>Stop: {r.stopName} · </>}
                 Contact (private): {r.reporter_contact?.trim() || "none given"}
               </p>
-              <ReportStatusControl reportId={r.id} status={r.status} />
+              {r.resolution_note && <p className="text-xs text-muted-foreground">Resolution note: {r.resolution_note}</p>}
+              <Link href={`/admin/reports/${r.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                Inspect and respond<span className="sr-only"> to this report</span>
+              </Link>
             </li>
           ))}
         </ul>

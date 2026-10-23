@@ -36,10 +36,14 @@ export async function saveRouteAction(routeId: string | null, draft: unknown): P
 export type RouteStatusResult = { status: "draft" | "active" | "inactive"; public: boolean; reason: string };
 
 /** Draft / active / inactive. Only active AND verified routes are ever public. */
-export async function setRouteStatusAction(routeId: string, status: "draft" | "active" | "inactive"): Promise<ActionResult<RouteStatusResult>> {
+export async function setRouteStatusAction(routeId: string, status: "draft" | "active" | "inactive", reason?: string): Promise<ActionResult<RouteStatusResult>> {
   return withAdmin(async ({ supabase }) => {
     if (!idSchema.safeParse(routeId).success || !["draft", "active", "inactive"].includes(status)) return fail("That request is not valid.");
-    const { data, error } = await supabase.from("routes").update({ status }).eq("id", routeId).select("status, verification_status, last_verified_at, is_sample").maybeSingle();
+    // Taking a route down is a temporary measure and needs a recorded reason. The database clears it again on reactivation.
+    const why = reason?.trim() ?? "";
+    if (status === "inactive" && why.length < 3) return fail("Say why this route is being deactivated.");
+    if (why.length > 500) return fail("Keep the reason under 500 characters.");
+    const { data, error } = await supabase.from("routes").update(status === "inactive" ? { status, deactivation_reason: why } : { status }).eq("id", routeId).select("status, verification_status, last_verified_at, is_sample").maybeSingle();
     if (error) return fail(describeDbError(error));
     if (!data) return fail("Route not found.");
     return done({ status: data.status, ...publicStatus(data) });

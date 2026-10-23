@@ -16,7 +16,7 @@ export type DataResult<T> =
   | { status: "error"; message: string };
 
 const ROUTE_COLUMNS = `
-  id, code, name, transport_type, verification_status,
+  id, code, name, transport_type, verification_status, last_verified_at,
   route_stops (
     direction, stop_order, boarding_allowed, dropoff_allowed,
     stops ( id, name, latitude, longitude, pickup_allowed, dropoff_allowed, verification_status )

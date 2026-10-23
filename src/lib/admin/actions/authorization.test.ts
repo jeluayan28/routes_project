@@ -69,7 +69,7 @@ const CALLS: [string, () => Promise<{ ok: boolean }>][] = [
   ["deleteFareAction", () => deleteFareAction(ID)],
   ["changeFareAction", () => changeFareAction({ fareId: ID, amount: "11", effectiveFrom: "2026-07-01", source: "A source" })],
   ["endFareAction", () => endFareAction({ fareId: ID, effectiveUntil: "2026-07-01" })],
-  ["setReportStatusAction", () => setReportStatusAction({ reportId: ID, status: "resolved" })],
+  ["setReportStatusAction", () => setReportStatusAction({ reportId: ID, status: "reviewing" })],
   ["saveRouteAction", () => saveRouteAction(null, { name: "R", code: "", transportType: "jeepney", description: "", originLabel: "", destinationLabel: "", directions: [{ kind: "outbound", stops: [], lines: [], geometrySource: "" }] })],
   ["setRouteStatusAction", () => setRouteStatusAction(ID, "active")],
   ["markRouteOutdatedAction", () => markRouteOutdatedAction(ID)],
@@ -118,8 +118,8 @@ describe("a client-supplied role is never trusted", () => {
 describe("an administrator is let through", () => {
   it("runs the action (so the refusals above are about authorization, not broken inputs)", async () => {
     who = "admin";
-    await setReportStatusAction({ reportId: ID, status: "resolved" });
-    expect(touched).toContain("from.route_reports");
+    await setReportStatusAction({ reportId: ID, status: "reviewing" });
+    expect(touched).toContain("rpc.set_report_status");
 
     touched.length = 0;
     await changeFareAction({ fareId: ID, amount: "11", effectiveFrom: "2026-07-01", source: "A source" });
@@ -131,6 +131,11 @@ describe("an administrator is let through", () => {
     expect((await setReportStatusAction({ reportId: "not-a-uuid", status: "resolved" })).ok).toBe(false);
     expect((await setReportStatusAction({ reportId: ID, status: "deleted" })).ok).toBe(false);
     expect((await changeFareAction({ fareId: ID, amount: "-5", effectiveFrom: "2026-07-01", source: "A source" })).ok).toBe(false);
+    expect((await setReportStatusAction({ reportId: ID, status: "resolved" })).ok).toBe(false);
+    expect((await setReportStatusAction({ reportId: ID, status: "rejected", note: "  " })).ok).toBe(false);
+    expect((await setRouteStatusAction(ID, "inactive")).ok).toBe(false);
+    expect((await setRouteStatusAction(ID, "inactive", "ab")).ok).toBe(false);
+    expect((await setRouteStatusAction(ID, "active", "x".repeat(501))).ok).toBe(false);
     expect(touched).toEqual([]);
   });
 });
