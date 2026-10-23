@@ -8,7 +8,7 @@ import { SITE_NAME } from "@/lib/constants";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b bg-background">
+    <header className="sticky top-0 z-40 border-b border-transparent on-navy">
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-4">
         <Link
           href="/"

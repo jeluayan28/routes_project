@@ -19,7 +19,7 @@ export const FARE_REASON: Record<FareUnavailableReason, (category: string) => st
 
 const STATUS_LABEL = { verified: "Verified", unverified: "Unverified", unavailable: "Unavailable" } as const;
 const STATUS_STYLE = {
-  verified: "border-emerald-600/40 bg-emerald-50 text-emerald-900",
+  verified: "border-gold bg-gold/20 text-foreground",
   unverified: "border-sky-600/40 bg-sky-50 text-sky-900",
   unavailable: "border-amber-600/40 bg-amber-50 text-amber-950",
 } as const;

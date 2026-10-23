@@ -30,7 +30,7 @@ export function TripResults({ response, params }: { response: TripSearchResponse
 
     case "location-problem":
       return (
-        <div role="alert" className="flex items-start gap-3 rounded-xl border border-amber-600/40 bg-amber-50 p-4 text-amber-950">
+        <div role="alert" className="flex items-start gap-3 rounded-xl border border-destructive/70 bg-destructive/15 p-4 text-foreground">
           <TriangleAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
           <div>
             <p className="font-medium">

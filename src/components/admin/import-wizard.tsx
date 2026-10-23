@@ -195,7 +195,7 @@ export function ImportWizard() {
                       </thead>
                       <tbody className="divide-y">
                         {p.rows.map((row) => (
-                          <tr key={row.line} className={cn(row.level === "error" && "bg-red-50", row.level === "warning" && "bg-amber-50")}>
+                          <tr key={row.line} className={cn(row.level === "error" && "bg-red-50 text-red-950", row.level === "warning" && "bg-amber-50 text-amber-950")}>
                             <td className="px-2 py-1.5 tabular-nums">{row.line}</td>
                             <td className="px-2 py-1.5 font-medium">{row.level === "ok" ? "OK" : row.level === "warning" ? "Warning" : "Error"}</td>
                             {row.cells.map((c, i) => <td key={i} className="px-2 py-1.5">{c}</td>)}
@@ -252,7 +252,7 @@ function IssueList({ issues }: { issues: ImportReport["issues"] }) {
         </thead>
         <tbody className="divide-y">
           {issues.slice(0, 300).map((issue, i) => (
-            <tr key={i} className={issue.severity === "error" ? "bg-red-50" : "bg-amber-50"}>
+            <tr key={i} className={issue.severity === "error" ? "bg-red-50 text-red-950" : "bg-amber-50 text-amber-950"}>
               <td className="px-3 py-2 font-medium">{issue.severity === "error" ? "Error" : "Warning"}</td>
               <td className="px-3 py-2">{issue.file}</td>
               <td className="px-3 py-2 tabular-nums">{issue.line ?? "-"}</td>

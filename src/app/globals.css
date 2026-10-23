@@ -24,6 +24,8 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
@@ -48,73 +50,65 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  --background: oklch(0.982 0.004 255);
-  --foreground: oklch(0.25 0.07 265);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.07 265);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.52 0.2 262);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.955 0.012 255);
-  --secondary-foreground: oklch(0.25 0.07 265);
-  --muted: oklch(0.955 0.01 255);
-  --muted-foreground: oklch(0.47 0.04 262);
-  --accent: oklch(0.955 0.02 258);
-  --accent-foreground: oklch(0.25 0.07 265);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.91 0.015 255);
-  --input: oklch(0.86 0.02 255);
-  --ring: oklch(0.6 0.17 262);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+/*
+ * Palette
+ *   Cream White   #F7F5EF  page background
+ *   Deep Navy     #172D46  navbar and footer (and body text)
+ *   Electric Teal #20B8A6  primary buttons and selected routes
+ *   Sunshine Gold #F2B84B  fare highlights and important markers
+ *   Mist Gray     #DCE6E5  borders and secondary panels
+ * Text on teal and gold is navy, because white on either is too faint to read.
+ * One light theme for everyone, so `.dark` shares the same values.
+ */
+:root,
+.dark {
+  --background: #f7f5ef;
+  --foreground: #172d46;
+  --card: #fdfcf9;
+  --card-foreground: #172d46;
+  --popover: #fdfcf9;
+  --popover-foreground: #172d46;
+  --primary: #20b8a6;
+  --primary-foreground: #172d46;
+  --secondary: #dce6e5;
+  --secondary-foreground: #172d46;
+  --muted: #dce6e5;
+  --muted-foreground: #4a5f74;
+  --accent: #dce6e5;
+  --accent-foreground: #172d46;
+  --destructive: #c0392b;
+  --border: #dce6e5;
+  --input: #c3d1d0;
+  --ring: #20b8a6;
+  --gold: #f2b84b;
+  --gold-foreground: #172d46;
+  --chart-1: #20b8a6;
+  --chart-2: #f2b84b;
+  --chart-3: #172d46;
+  --chart-4: #dce6e5;
+  --chart-5: #4a5f74;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #fdfcf9;
+  --sidebar-foreground: #172d46;
+  --sidebar-primary: #20b8a6;
+  --sidebar-primary-foreground: #172d46;
+  --sidebar-accent: #dce6e5;
+  --sidebar-accent-foreground: #172d46;
+  --sidebar-border: #dce6e5;
+  --sidebar-ring: #20b8a6;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* Navbar and footer: Deep Navy with cream text. Everything inside re-reads the tokens. */
+.on-navy {
+  background: #172d46;
+  color: #f7f5ef;
+  --foreground: #f7f5ef;
+  --card-foreground: #f7f5ef;
+  --muted-foreground: #c9d6d6;
+  --accent: rgb(247 245 239 / 12%);
+  --accent-foreground: #f7f5ef;
+  --border: rgb(247 245 239 / 18%);
+  --input: rgb(247 245 239 / 28%);
 }
 
 @layer base {

@@ -49,11 +49,11 @@ export function RouteDetailsPanel({
       </header>
 
       <dl className="grid gap-3 text-sm sm:grid-cols-2">
-        <div className="rounded-lg border border-green-600/25 bg-green-50 px-3 py-2">
+        <div className="rounded-lg border border-green-600/25 bg-green-50 px-3 py-2 text-green-950">
           <dt className="text-xs font-medium text-green-800">Starting point</dt>
           <dd className="font-medium">{start ?? "Not recorded"}</dd>
         </div>
-        <div className="rounded-lg border border-red-600/25 bg-red-50 px-3 py-2">
+        <div className="rounded-lg border border-red-600/25 bg-red-50 px-3 py-2 text-red-950">
           <dt className="text-xs font-medium text-red-800">Ending point</dt>
           <dd className="font-medium">{end ?? "Not recorded"}</dd>
         </div>

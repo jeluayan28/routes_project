@@ -13,7 +13,7 @@ export function FareBadge({ fare, className }: { fare: FareRecord; className?: s
     <div
       className={cn(
         "flex flex-wrap items-center justify-between gap-2 rounded-lg border px-3 py-2",
-        confirmed ? "border-green-600/30 bg-green-50" : "border-dashed bg-muted/50",
+        confirmed ? "border-gold bg-gold/20 text-foreground" : "border-dashed bg-muted/50",
         className,
       )}
     >
