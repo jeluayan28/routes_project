@@ -7,6 +7,7 @@ import { PlaceInput } from "@/components/search/place-input";
 import { TransportFilter } from "@/components/search/transport-filter";
 import { Button } from "@/components/ui/button";
 import { FARE_CATEGORY_LABEL } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import { tripQuery } from "@/lib/search/params";
 import { HARD_MAX_TRANSFERS, type Preference } from "@/lib/search/types";
 import { validateTripSearch, type TripSearchErrors, type TripSearchInput } from "@/lib/validation/trip-search";
@@ -18,6 +19,8 @@ export type TripSearchFormProps = {
   onSearch?: (input: TripSearchInput) => void;
   /** Values to start with, e.g. from the URL of a previous search. */
   initial?: Partial<TripSearchInput>;
+  /** "hero" is the compact "Where to go?" card on the home page: stacked fields, options tucked away. */
+  layout?: "default" | "hero";
 };
 
 const PREFERENCE_LABEL: Record<Preference, string> = {
@@ -29,7 +32,8 @@ const PREFERENCE_LABEL: Record<Preference, string> = {
 const selectClass =
   "h-10 w-full rounded-lg border border-input bg-card px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
 
-export function TripSearchForm({ onSearch, initial }: TripSearchFormProps) {
+export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSearchFormProps) {
+  const hero = layout === "hero";
   const router = useRouter();
   const uid = useId();
   const formRef = useRef<HTMLFormElement>(null);
@@ -78,63 +82,26 @@ export function TripSearchForm({ onSearch, initial }: TripSearchFormProps) {
     router.push(`/search?${tripQuery(result.value)}`);
   };
 
-  return (
-    <form
-      ref={formRef}
-      onSubmit={submit}
-      noValidate
-      aria-label="Search routes"
-      className="space-y-4 rounded-2xl border bg-card p-4 shadow-xs sm:p-5"
-    >
-      <div className="grid items-start gap-3 md:grid-cols-[1fr_auto_1fr]">
-        <div className="space-y-1.5">
-          <PlaceInput
-            id={`${uid}-from`}
-            kind="origin"
-            label="Starting point"
-            placeholder="A stop, a landmark, or coordinates"
-            value={from}
-            onChange={setFrom}
-            error={errors.from}
-          />
-          <button
-            type="button"
-            onClick={useMyLocation}
-            disabled={locating === "busy"}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-          >
-            <LocateFixed aria-hidden="true" className="size-4" />
-            {locating === "busy" ? "Finding you…" : "Use my location"}
-          </button>
-          {locating === "failed" && (
-            <p role="status" className="text-sm text-muted-foreground">
-              We couldn&apos;t get your location. Type a place instead.
-            </p>
-          )}
-        </div>
-        <div className="flex justify-center md:pt-[1.625rem]">
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={swap}
-            aria-label="Swap starting point and destination"
-            className="size-11 rounded-full md:size-9"
-          >
-            <ArrowUpDown aria-hidden="true" className="md:-rotate-90" />
-          </Button>
-        </div>
-        <PlaceInput
-          id={`${uid}-to`}
-          kind="destination"
-          label="Destination"
-          placeholder="A stop, a landmark, or coordinates"
-          value={to}
-          onChange={setTo}
-          error={errors.to}
-        />
-      </div>
+  const transportFilter = (
+    <div className="space-y-1.5">
+      <TransportFilter
+        value={types}
+        onChange={(next) => {
+          setTypes(next);
+          setErrors((prev) => ({ ...prev, types: undefined }));
+        }}
+        describedBy={errors.types ? typesErrorId : undefined}
+      />
+      {errors.types && (
+        <p id={typesErrorId} role="alert" className="text-sm text-red-700">
+          {errors.types}
+        </p>
+      )}
+    </div>
+  );
 
+  const options = (
+    <>
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-1.5">
           <label htmlFor={`${uid}-category`} className="text-sm font-medium">Passenger</label>
@@ -161,24 +128,86 @@ export function TripSearchForm({ onSearch, initial }: TripSearchFormProps) {
           </select>
         </div>
       </div>
+      {hero && transportFilter}
+    </>
+  );
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+  return (
+    <form
+      ref={formRef}
+      onSubmit={submit}
+      noValidate
+      aria-label="Search routes"
+      className={cn("space-y-4 rounded-2xl border bg-card p-4 shadow-xs sm:p-5", hero && "on-light border-transparent p-5 shadow-xl sm:p-6")}
+    >
+      {hero && <h2 className="text-2xl font-semibold tracking-tight">Where to go?</h2>}
+      <div className={cn("grid items-start gap-3", hero ? "grid-cols-1" : "md:grid-cols-[1fr_auto_1fr]")}>
         <div className="space-y-1.5">
-          <TransportFilter
-            value={types}
-            onChange={(next) => {
-              setTypes(next);
-              setErrors((prev) => ({ ...prev, types: undefined }));
-            }}
-            describedBy={errors.types ? typesErrorId : undefined}
+          <PlaceInput
+            id={`${uid}-from`}
+            kind="origin"
+            label="Starting point"
+            placeholder="A stop, a landmark, or coordinates"
+            value={from}
+            onChange={setFrom}
+            error={errors.from}
           />
-          {errors.types && (
-            <p id={typesErrorId} role="alert" className="text-sm text-red-700">
-              {errors.types}
+          <button
+            type="button"
+            onClick={useMyLocation}
+            disabled={locating === "busy"}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded text-sm font-medium text-link underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+          >
+            <LocateFixed aria-hidden="true" className="size-4" />
+            {locating === "busy" ? "Finding you…" : "Use my location"}
+          </button>
+          {locating === "failed" && (
+            <p role="status" className="text-sm text-muted-foreground">
+              We couldn&apos;t get your location. Type a place instead.
             </p>
           )}
         </div>
-        <Button type="submit" size="lg" className="h-11 sm:min-w-40">
+        <div className={cn("flex justify-center", !hero && "md:pt-[1.625rem]")}>
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={swap}
+            aria-label="Swap starting point and destination"
+            className="size-11 rounded-full md:size-9"
+          >
+            <ArrowUpDown aria-hidden="true" className={hero ? undefined : "md:-rotate-90"} />
+          </Button>
+        </div>
+        <PlaceInput
+          id={`${uid}-to`}
+          kind="destination"
+          label="Destination"
+          placeholder="A stop, a landmark, or coordinates"
+          value={to}
+          onChange={setTo}
+          error={errors.to}
+        />
+      </div>
+
+      {hero ? (
+        <details open={errors.types ? true : undefined} className="rounded-lg border border-dashed px-3 py-2">
+          <summary className="cursor-pointer text-sm font-medium text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            More options
+          </summary>
+          <div className="mt-3 space-y-4">{options}</div>
+        </details>
+      ) : (
+        options
+      )}
+
+      <div className={cn("flex flex-col gap-3", !hero && "sm:flex-row sm:items-center sm:justify-between")}>
+        {!hero && transportFilter}
+        <Button
+          type="submit"
+          size="lg"
+          className={cn("h-11 sm:min-w-40", hero && "w-full bg-gold font-semibold text-gold-foreground hover:bg-gold/90")}
+        >
           <Search aria-hidden="true" />
           Search Routes
         </Button>

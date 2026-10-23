@@ -92,7 +92,7 @@ export function TripResults({ response, params }: { response: TripSearchResponse
           />
           <p className="text-center text-sm text-muted-foreground">
             This only means no <strong>verified</strong> route was found. A service may exist that has not been added yet.{" "}
-            <Link href="/explore" className="text-primary underline-offset-4 hover:underline">
+            <Link href="/explore" className="text-link underline-offset-4 hover:underline">
               Browse all routes
             </Link>
           </p>

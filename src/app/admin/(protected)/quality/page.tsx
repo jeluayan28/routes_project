@@ -47,7 +47,7 @@ export default async function AdminQualityPage() {
           <ul className="divide-y rounded-xl border bg-card">
             {report.routes.map((r) => (
               <li key={r.id} className="space-y-1 p-3 text-sm">
-                <Link href={`/admin/routes/${r.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+                <Link href={`/admin/routes/${r.id}`} className="font-medium text-link underline-offset-4 hover:underline">
                   {r.code ? `${r.code} · ` : ""}{r.name}
                 </Link>
                 <span className="ml-2 text-xs text-muted-foreground">{r.status}</span>
@@ -66,7 +66,7 @@ export default async function AdminQualityPage() {
           <ul className="divide-y rounded-xl border bg-card">
             {report.stops.map((s) => (
               <li key={s.id} className="space-y-1 p-3 text-sm">
-                <Link href={`/admin/stops?q=${encodeURIComponent(s.name)}`} className="font-medium text-primary underline-offset-4 hover:underline">{s.name}</Link>
+                <Link href={`/admin/stops?q=${encodeURIComponent(s.name)}`} className="font-medium text-link underline-offset-4 hover:underline">{s.name}</Link>
                 {s.detail && <span className="ml-2 text-xs text-muted-foreground">{s.detail}</span>}
                 <ul className="flex flex-wrap gap-1.5">
                   {s.flags.map((f) => <li key={f} className="rounded-full border border-amber-600/40 bg-amber-50 px-2 py-0.5 text-xs text-amber-900">{FLAG_LABEL[f]}</li>)}

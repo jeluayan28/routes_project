@@ -123,7 +123,7 @@ export function ExploreView({
 
           {trip && (
             <div role="note" className="flex items-start gap-2 rounded-lg border bg-card px-3 py-2 text-sm">
-              <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
+              <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-link" />
               <p>
                 You searched <strong className="text-green-700">{trip.from}</strong> to{" "}
                 <strong className="text-red-700">{trip.to}</strong>. Trip planning isn&apos;t available

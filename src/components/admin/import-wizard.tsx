@@ -107,7 +107,7 @@ export function ImportWizard() {
           </p>
         </Notice>
         <p className="text-sm">
-          Next: <Link className="font-medium text-primary underline-offset-4 hover:underline" href={`/admin/routes?batch=${result.batchId}`}>review the imported routes</Link>,
+          Next: <Link className="font-medium text-link underline-offset-4 hover:underline" href={`/admin/routes?batch=${result.batchId}`}>review the imported routes</Link>,
           fix anything wrong, then verify each one against its source. See the review procedure in <code className="rounded bg-muted px-1">docs/ADMIN.md</code>.
         </p>
         <Button type="button" variant="outline" onClick={cancel}>Import more</Button>

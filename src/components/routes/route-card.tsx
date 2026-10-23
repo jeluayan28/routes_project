@@ -22,7 +22,7 @@ export function RouteCard({ route, selected = false, onSelect, className }: Rout
   const body = (
     <>
       <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-2 text-sm font-medium text-primary">
+        <span className="flex items-center gap-2 text-sm font-medium text-link">
           <span aria-hidden="true" className="size-3 shrink-0 rounded-full" style={{ background: routeColor(route.id) }} />
           <VehicleIcon type={route.vehicleType} className="size-4" />
           {route.code}
@@ -62,7 +62,7 @@ export function RouteCard({ route, selected = false, onSelect, className }: Rout
       <div className="border-t px-4 py-2">
         <Link
           href={`/routes/${route.id}`}
-          className="inline-flex items-center gap-1 rounded text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+          className="inline-flex items-center gap-1 rounded text-sm font-medium text-link underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
         >
           View details
           <span className="sr-only"> for {route.name}</span>

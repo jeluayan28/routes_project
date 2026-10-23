@@ -31,7 +31,7 @@ export default async function AdminReportPage({ params }: PageProps<"/admin/repo
 
   return (
     <div className="space-y-6">
-      <Link href="/admin/reports" className="text-sm font-medium text-primary underline-offset-4 hover:underline">Back to reports</Link>
+      <Link href="/admin/reports" className="text-sm font-medium text-link underline-offset-4 hover:underline">Back to reports</Link>
 
       <header className="space-y-1">
         <h1 className="text-2xl font-semibold tracking-tight">{REPORT_TYPE_LABEL[report.report_type]}</h1>

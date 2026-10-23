@@ -24,6 +24,7 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
+  --color-link: var(--link);
   --color-gold: var(--gold);
   --color-gold-foreground: var(--gold-foreground);
   --color-input: var(--input);
@@ -80,6 +81,7 @@
   --border: #dce6e5;
   --input: #c3d1d0;
   --ring: #20b8a6;
+  --link: #0b7a6e;
   --gold: #f2b84b;
   --gold-foreground: #172d46;
   --chart-1: #20b8a6;
@@ -98,10 +100,24 @@
   --sidebar-ring: #20b8a6;
 }
 
+/* A light card placed inside a navy area (for example the home page form). */
+.on-light {
+  color: #172d46;
+  --link: #0b7a6e;
+  --foreground: #172d46;
+  --card-foreground: #172d46;
+  --muted-foreground: #4a5f74;
+  --accent: #dce6e5;
+  --accent-foreground: #172d46;
+  --border: #dce6e5;
+  --input: #c3d1d0;
+}
+
 /* Navbar and footer: Deep Navy with cream text. Everything inside re-reads the tokens. */
 .on-navy {
   background: #172d46;
   color: #f7f5ef;
+  --link: #4fd1c1;
   --foreground: #f7f5ef;
   --card-foreground: #f7f5ef;
   --muted-foreground: #c9d6d6;

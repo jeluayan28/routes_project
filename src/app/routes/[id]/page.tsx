@@ -61,7 +61,7 @@ export default function RoutePage({ params }: PageProps<"/routes/[id]">) {
     <div className="mx-auto w-full max-w-6xl space-y-4 px-4 py-6">
       <Link
         href="/explore"
-        className="inline-flex items-center gap-1 rounded text-sm font-medium text-primary outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex items-center gap-1 rounded text-sm font-medium text-link outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
       >
         <ArrowLeft aria-hidden="true" className="size-4" />
         Back to all routes

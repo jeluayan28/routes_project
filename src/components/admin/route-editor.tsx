@@ -138,7 +138,7 @@ export function RouteEditor({ data, initialTab = "details" }: { data: EditorData
               onClick={() => setTab(t.key)}
               className={cn(
                 "-mb-px min-h-10 border-b-2 px-3 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40",
-                tab === t.key ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground",
+                tab === t.key ? "border-primary text-link" : "border-transparent text-muted-foreground hover:text-foreground",
               )}
             >
               {t.label}

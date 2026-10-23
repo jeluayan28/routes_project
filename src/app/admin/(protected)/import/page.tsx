@@ -56,7 +56,7 @@ export default async function AdminImportPage() {
                     <tr key={b.id}>
                       <td className="px-4 py-3">{formatDate(b.created_at)}</td>
                       <td className="px-4 py-3">
-                        <Link href={`/admin/routes?batch=${b.id}`} className="text-primary underline-offset-4 hover:underline">{b.source_description}</Link>
+                        <Link href={`/admin/routes?batch=${b.id}`} className="text-link underline-offset-4 hover:underline">{b.source_description}</Link>
                       </td>
                       <td className="px-4 py-3 tabular-nums">{c.stops ?? 0} stops, {c.routes ?? 0} routes, {c.route_stops ?? 0} route stops, {c.fares ?? 0} fares</td>
                       <td className="px-4 py-3"><code className="text-xs">{b.imported_by ?? "unknown"}</code></td>

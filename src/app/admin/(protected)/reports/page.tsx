@@ -46,7 +46,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps<"/adm
         <p className="text-sm text-muted-foreground">
           Corrections sent in by the public. Reporter contact details are shown only here, to administrators, and never on the public site. Each status
           change is recorded in the{" "}
-          <Link href="/admin/audit?entity=route_reports" className="text-primary underline-offset-4 hover:underline">audit log</Link>.
+          <Link href="/admin/audit?entity=route_reports" className="text-link underline-offset-4 hover:underline">audit log</Link>.
         </p>
       </div>
 
@@ -89,7 +89,7 @@ export default async function AdminReportsPage({ searchParams }: PageProps<"/adm
                 {r.route_id && (
                   <>
                     Route:{" "}
-                    <Link href={`/admin/routes/${r.route_id}`} className="text-primary underline-offset-4 hover:underline">{r.routeName ?? r.route_id}</Link> ·{" "}
+                    <Link href={`/admin/routes/${r.route_id}`} className="text-link underline-offset-4 hover:underline">{r.routeName ?? r.route_id}</Link> ·{" "}
                   </>
                 )}
                 {r.stopName && <>Stop: {r.stopName} · </>}

@@ -66,11 +66,19 @@ export default function RouteMap({
   className,
 }: RouteMapProps) {
   const [map, setMap] = useState<LeafletMap | null>(null);
+  // react-leaflet removes its map whenever effects are torn down (React Strict Mode in
+  // development, or a cached page being hidden), yet keeps the dead map in state. A new
+  // key makes the next mount build a fresh map instead of adding layers to a removed one.
+  const [mapKey, setMapKey] = useState(0);
   const [tilesFailed, setTilesFailed] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const tileErrors = useRef(0);
   const hadSelection = useRef(false);
   const tiles = useMemo(() => resolveTileConfig(), []);
+
+  useEffect(() => {
+    return () => setMapKey((k) => k + 1);
+  }, []);
 
   // A failed request must never show routes, so nothing is drawn on error.
   const shown = useMemo(() => (error ? [] : routes), [error, routes]);
@@ -139,6 +147,7 @@ export default function RouteMap({
       className={cn("relative isolate", className)}
     >
       <MapContainer
+        key={mapKey}
         ref={setMap}
         center={toTuple(center)}
         zoom={zoom}

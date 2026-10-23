@@ -74,7 +74,7 @@ export default async function AdminDashboardPage() {
       <section aria-labelledby="recent-heading" className="space-y-3">
         <div className="flex items-center justify-between gap-2">
           <h2 id="recent-heading" className="text-lg font-semibold">Recently updated</h2>
-          <Link href="/admin/audit" className="text-sm text-primary underline-offset-4 hover:underline">Full audit log</Link>
+          <Link href="/admin/audit" className="text-sm text-link underline-offset-4 hover:underline">Full audit log</Link>
         </div>
         {recent.length === 0 ? (
           <p className="rounded-xl border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">Nothing has been changed yet.</p>
@@ -99,7 +99,7 @@ export default async function AdminDashboardPage() {
           <ul className="divide-y rounded-xl border bg-card">
             {d.needsReview.slice(0, 8).map(({ id, reasons }) => (
               <li key={id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
-                <Link href={`/admin/routes/${id}?tab=verify`} className="font-medium text-primary underline-offset-4 hover:underline">
+                <Link href={`/admin/routes/${id}?tab=verify`} className="font-medium text-link underline-offset-4 hover:underline">
                   {byId.get(id)?.name ?? id}
                 </Link>
                 <span className="text-sm text-muted-foreground">{reasons.map((r) => REVIEW_REASON_LABEL[r]).join(" · ")}</span>

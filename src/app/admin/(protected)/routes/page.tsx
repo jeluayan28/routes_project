@@ -102,7 +102,7 @@ export default async function AdminRoutesPage({ searchParams }: PageProps<"/admi
       {batch && (
         <p className="text-sm text-muted-foreground">
           Showing routes from import batch <code className="rounded bg-muted px-1">{batch}</code>.{" "}
-          <Link href="/admin/routes" className="text-primary underline-offset-4 hover:underline">Show all</Link>
+          <Link href="/admin/routes" className="text-link underline-offset-4 hover:underline">Show all</Link>
         </p>
       )}
 
@@ -129,7 +129,7 @@ export default async function AdminRoutesPage({ searchParams }: PageProps<"/admi
               {page.items.map((r) => (
                 <tr key={r.id} className="align-top">
                   <td className="px-4 py-3">
-                    <Link href={`/admin/routes/${r.id}`} className="font-medium text-primary underline-offset-4 hover:underline">
+                    <Link href={`/admin/routes/${r.id}`} className="font-medium text-link underline-offset-4 hover:underline">
                       {r.name}
                     </Link>
                     <p className="text-xs text-muted-foreground">

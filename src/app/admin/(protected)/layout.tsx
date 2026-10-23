@@ -29,7 +29,7 @@ async function AdminGate({ children }: { children: ReactNode }) {
           title="This account is not an administrator"
           message={`${ctx.email ?? "This account"} is signed in but is not on the administrator list. Ask the project owner to add it.`}
         />
-        <Link href="/" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+        <Link href="/" className="text-sm font-medium text-link underline-offset-4 hover:underline">
           Back to the site
         </Link>
       </div>

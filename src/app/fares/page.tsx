@@ -52,13 +52,13 @@ async function FareContent() {
             <li key={route.id} className="rounded-2xl border bg-card p-5 shadow-xs">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="flex items-center gap-1.5 text-sm font-medium text-primary">
+                  <p className="flex items-center gap-1.5 text-sm font-medium text-link">
                     <VehicleIcon type={route.vehicleType} className="size-4" />
                     {VEHICLE_LABEL[route.vehicleType]} · {route.code}
                   </p>
                   <h2 className="font-semibold">{route.name}</h2>
                 </div>
-                <Link href={`/routes/${route.id}`} className="text-sm font-medium text-primary underline-offset-4 hover:underline">
+                <Link href={`/routes/${route.id}`} className="text-sm font-medium text-link underline-offset-4 hover:underline">
                   View route<span className="sr-only"> {route.name}</span>
                 </Link>
               </div>

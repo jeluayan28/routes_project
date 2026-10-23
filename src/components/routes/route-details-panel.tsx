@@ -36,7 +36,7 @@ export function RouteDetailsPanel({
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="flex items-center gap-2 text-sm font-medium text-primary">
+        <p className="flex items-center gap-2 text-sm font-medium text-link">
           <span aria-hidden="true" className="size-3 shrink-0 rounded-full" style={{ background: routeColor(route.id) }} />
           <VehicleIcon type={route.vehicleType} className="size-4" />
           {VEHICLE_LABEL[route.vehicleType]} · {route.code}

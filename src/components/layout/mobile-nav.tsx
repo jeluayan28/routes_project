@@ -35,7 +35,7 @@ export function MobileNav({ className }: { className?: string }) {
                     aria-current={active ? "page" : undefined}
                     className={cn(
                       "block rounded-md px-3 py-3 text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      active ? "bg-accent text-primary" : "hover:bg-accent",
+                      active ? "bg-accent text-link" : "hover:bg-accent",
                     )}
                   >
                     {item.label}
