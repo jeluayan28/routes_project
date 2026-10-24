@@ -8,7 +8,7 @@ export function firstParam(value: string | string[] | undefined): string | undef
 
 const ALL_TYPES: VehicleType[] = [...vehicleTypeSchema.options];
 
-/** Parses `types=jeepney,multicab`; unknown values are dropped, missing means all. */
+/** Parses `types=minibus,multicab`; unknown values are dropped, missing means all. */
 export function parseTypes(value: string | undefined): VehicleType[] {
   if (!value) return ALL_TYPES;
   const parsed = value

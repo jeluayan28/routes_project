@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { SAMPLE_ROUTES } from "@/dev-fixtures/sample-routes";
 import { filterRoutes, routeEndpoints } from "./filter";
 
-const BOTH = ["jeepney", "multicab"] as const;
+const BOTH = ["minibus", "multicab"] as const;
 
 describe("filterRoutes", () => {
   it("returns everything for both types and an empty query", () => {
@@ -12,8 +12,8 @@ describe("filterRoutes", () => {
   it("filters by vehicle type", () => {
     const multicab = filterRoutes(SAMPLE_ROUTES, { query: "", types: ["multicab"] });
     expect(multicab.map((r) => r.id)).toEqual(["sample-c", "sample-d"]);
-    const jeepney = filterRoutes(SAMPLE_ROUTES, { query: "", types: ["jeepney"] });
-    expect(jeepney.map((r) => r.id)).toEqual(["sample-a", "sample-b"]);
+    const minibus = filterRoutes(SAMPLE_ROUTES, { query: "", types: ["minibus"] });
+    expect(minibus.map((r) => r.id)).toEqual(["sample-a", "sample-b"]);
   });
 
   it("returns nothing when no type is selected", () => {

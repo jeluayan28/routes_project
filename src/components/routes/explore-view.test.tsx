@@ -34,9 +34,9 @@ describe("filtering by transport type", () => {
 
   it("filters list, dropdown and map together", () => {
     const { container } = view();
-    fireEvent.click(screen.getByRole("button", { name: "Jeepney" })); // turn jeepney off
+    fireEvent.click(screen.getByRole("button", { name: "Minibus" })); // turn minibus off
 
-    expect(screen.getByRole("button", { name: "Jeepney" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Minibus" })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByRole("button", { name: "Multicab" })).toHaveAttribute("aria-pressed", "true");
     expect(listButtons()).toHaveLength(2);
     expect(within(list()).queryByText("Sample Route A")).toBeNull();
@@ -45,14 +45,14 @@ describe("filtering by transport type", () => {
       "SAMPLE-C · Sample Route C",
       "SAMPLE-D · Sample Route D (no geometry)",
     ]);
-    // Jeepney-only stops are gone from the map.
+    // Minibus-only stops are gone from the map.
     expect(marker(container, "Sample Stop A1")).toBeNull();
     expect(marker(container, "Sample Stop C1")).not.toBeNull();
   });
 
   it("shows an explanation when no type is chosen", () => {
     view();
-    fireEvent.click(screen.getByRole("button", { name: "Jeepney" }));
+    fireEvent.click(screen.getByRole("button", { name: "Minibus" }));
     fireEvent.click(screen.getByRole("button", { name: "Multicab" }));
     expect(screen.getByText("No transport type selected")).toBeTruthy();
     expect(screen.getByText("No routes match the current filters.")).toBeTruthy();
@@ -124,7 +124,7 @@ describe("route selection", () => {
 
   it("keeps the selected route visible when its type is filtered out", () => {
     view({ initialSelectedId: "sample-a" });
-    fireEvent.click(screen.getByRole("button", { name: "Jeepney" }));
+    fireEvent.click(screen.getByRole("button", { name: "Minibus" }));
     expect(routeSelect().value).toBe("sample-a");
     expect(screen.getByRole("heading", { name: "Sample Route A" })).toBeTruthy();
   });

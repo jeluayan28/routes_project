@@ -8,7 +8,7 @@ export function SiteFooter() {
       <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-8 text-sm text-muted-foreground sm:grid-cols-2">
         <div className="space-y-2">
           <p className="font-semibold">{SITE_NAME}</p>
-          <p>Free community guide to jeepney and multicab routes in Butuan City.</p>
+          <p>Free community guide to minibus and multicab routes in Butuan City.</p>
           <p>
             Map data &copy;{" "}
             <a className="underline underline-offset-2" href="https://www.openstreetmap.org/copyright">

@@ -18,8 +18,8 @@ insert into auth.users (id, email, raw_user_meta_data) values
 insert into private.admin_users (user_id) values ('aaaaaaaa-0000-0000-0000-000000000001');
 
 insert into public.routes (id, code, name, transport_type, status, verification_status, last_verified_at) values
-  ('11111111-0000-0000-0000-000000000001', 'T-PUB',   'Test public',     'jeepney',  'active',   'verified',   now()),
-  ('11111111-0000-0000-0000-000000000002', 'T-DRAFT', 'Test draft',      'jeepney',  'draft',    'verified',   now()),
+  ('11111111-0000-0000-0000-000000000001', 'T-PUB',   'Test public',     'minibus',  'active',   'verified',   now()),
+  ('11111111-0000-0000-0000-000000000002', 'T-DRAFT', 'Test draft',      'minibus',  'draft',    'verified',   now()),
   ('11111111-0000-0000-0000-000000000003', 'T-INACT', 'Test inactive',   'multicab', 'inactive', 'verified',   now()),
   ('11111111-0000-0000-0000-000000000004', 'T-UNVER', 'Test unverified', 'multicab', 'active',   'unverified', null);
 
@@ -70,7 +70,7 @@ select is((select count(*)::int from public.fare_rules), 1,
   'anon sees only verified fares of public routes');
 select is((select count(*)::int from public.landmarks), 1, 'anon sees only verified landmarks');
 
-select throws_ok($$ insert into public.routes (name, transport_type) values ('x', 'jeepney') $$,
+select throws_ok($$ insert into public.routes (name, transport_type) values ('x', 'minibus') $$,
   '42501', null, 'anon cannot insert routes');
 select throws_ok($$ update public.routes set name = 'hacked' $$,
   '42501', null, 'anon cannot update routes');
@@ -140,7 +140,7 @@ set local request.jwt.claims = '{"sub":"bbbbbbbb-0000-0000-0000-000000000002","r
 
 select is(private.is_admin(), false, 'user_metadata cannot confer admin');
 select is((select count(*)::int from public.routes), 1, 'non-admin sees only public routes');
-select throws_ok($$ insert into public.routes (name, transport_type) values ('x', 'jeepney') $$,
+select throws_ok($$ insert into public.routes (name, transport_type) values ('x', 'minibus') $$,
   '42501', null, 'non-admin cannot insert routes (RLS)');
 select throws_ok($$ insert into public.fare_rules (route_id, amount, effective_from)
   values ('11111111-0000-0000-0000-000000000001', 1, '2030-01-01') $$,
@@ -167,7 +167,7 @@ set local request.jwt.claims = '{"sub":"aaaaaaaa-0000-0000-0000-000000000001","r
 select is(private.is_admin(), true, 'allow-listed account is an admin');
 select is((select count(*)::int from public.routes), 4, 'admin sees every route incl. drafts');
 select lives_ok($$ insert into public.routes (id, name, transport_type)
-  values ('11111111-0000-0000-0000-0000000000aa', 'Admin created', 'jeepney') $$,
+  values ('11111111-0000-0000-0000-0000000000aa', 'Admin created', 'minibus') $$,
   'admin can insert routes');
 select lives_ok($$ update public.routes set description = 'edited'
   where id = '11111111-0000-0000-0000-0000000000aa' $$, 'admin can update routes');

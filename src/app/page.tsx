@@ -14,7 +14,7 @@ import { getRoutes } from "@/lib/data/routes";
 
 const STEPS = [
   { title: "Enter your trip", body: "Tell us where you are starting and where you want to go." },
-  { title: "Browse routes", body: "Compare jeepney and multicab routes, their stops, and direction on the map." },
+  { title: "Browse routes", body: "Compare minibus and multicab routes, their stops, and direction on the map." },
   { title: "Check the details", body: "See fares and when they were last verified before you ride." },
 ];
 
@@ -77,8 +77,8 @@ function HomeSkeleton() {
   );
 }
 
-/** Drop your own photo at public/pics/hero.jpg. Until then the navy background shows. */
-const HERO_IMAGE = "/pics/hero.jpg";
+/** Hero photo, shown behind a navy tint. If it is missing the navy background shows. */
+const HERO_IMAGE = "/pics/landing_pic.jpg";
 
 const HERO_LINKS = [
   { href: "/explore", title: "Routes & Map", icon: RouteIcon },
@@ -88,42 +88,50 @@ const HERO_LINKS = [
 function Hero() {
   return (
     <section aria-labelledby="hero-heading" className="on-navy overflow-hidden">
-      <div className="mx-auto grid w-full max-w-6xl lg:min-h-[30rem] lg:grid-cols-[1.15fr_1fr]">
+      <div className="relative isolate">
+        {/*
+          The photo runs to the left edge of the screen, behind the content, and ends in a curve.
+          On wide screens its width follows the content column so it never reaches the form.
+        */}
         <div
-          className="relative flex min-h-64 items-center bg-cover bg-center px-6 py-10 sm:px-10 lg:rounded-r-[45%] lg:px-12"
-          style={{ backgroundImage: `linear-gradient(90deg, rgb(23 45 70 / 0.88), rgb(23 45 70 / 0.35)), url(${HERO_IMAGE})` }}
-        >
-          <div className="space-y-4">
-            <h1 id="hero-heading" className="text-5xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
-              Find your way
-              <br />
-              around Butuan.
-            </h1>
-            <p className="text-sm font-medium tracking-[0.3em] uppercase">Jeepney &amp; multicab routes</p>
-            <p className="max-w-sm text-sm text-muted-foreground">Routes, stops and fares. Free, with no account needed.</p>
+          aria-hidden="true"
+          className="absolute inset-y-0 left-0 -z-10 w-full bg-cover bg-center lg:w-[max(52%,calc((100%_-_72rem)/2_+_37rem))] lg:[border-radius:0_30%_30%_0/0_50%_50%_0]"
+          style={{ backgroundImage: `linear-gradient(90deg, rgb(23 45 70 / 0.85), rgb(23 45 70 / 0.3)), url(${HERO_IMAGE})` }}
+        />
+        <div className="mx-auto grid w-full max-w-6xl lg:min-h-[34rem] lg:grid-cols-[1.15fr_1fr]">
+          <div className="flex min-h-64 items-center px-4 py-12 lg:py-10">
+            <div className="space-y-4">
+              <h1 id="hero-heading" className="text-5xl leading-[1.05] font-semibold tracking-tight [text-shadow:0_2px_14px_rgb(0_0_0/0.55)] sm:text-6xl">
+                Find your way
+                <br />
+                around Butuan.
+              </h1>
+              <p className="text-sm font-medium tracking-[0.3em] uppercase">Minibus &amp; multicab routes</p>
+              <p className="max-w-sm text-sm">Routes, stops and fares. Free, with no account needed.</p>
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-4 px-4 py-8 sm:px-8 lg:py-10">
-          <TripSearchForm layout="hero" />
-          <ul className="grid grid-cols-2 gap-3">
-            {HERO_LINKS.map(({ href, title, icon: Icon }) => (
-              <li key={href}>
-                <Link
-                  href={href}
-                  className="flex h-full flex-col gap-1 rounded-xl border border-white/40 p-3 text-sm font-semibold outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <span className="flex items-center gap-2">
-                    <Icon aria-hidden="true" className="size-4" />
-                    {title}
-                  </span>
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-gold">
-                    VIEW HERE <ArrowRight aria-hidden="true" className="size-3" />
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-4 px-4 py-8 sm:px-8 lg:py-10">
+            <TripSearchForm layout="hero" />
+            <ul className="grid grid-cols-2 gap-3">
+              {HERO_LINKS.map(({ href, title, icon: Icon }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="flex h-full flex-col gap-1 rounded-xl border border-white/40 p-3 text-sm font-semibold outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Icon aria-hidden="true" className="size-4" />
+                      {title}
+                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-medium text-gold">
+                      VIEW HERE <ArrowRight aria-hidden="true" className="size-3" />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
       <div className="bg-black/25 py-4 text-center text-sm">

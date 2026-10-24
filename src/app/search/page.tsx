@@ -13,7 +13,7 @@ import { runTripSearch } from "@/lib/search/service";
 
 export const metadata: Metadata = {
   title: "Find a route",
-  description: "Find verified jeepney and multicab routes between two places in Butuan City, with transfers and fares where verified.",
+  description: "Find verified minibus and multicab routes between two places in Butuan City, with transfers and fares where verified.",
 };
 
 async function SearchContent({ searchParams }: { searchParams: PageProps<"/search">["searchParams"] }) {

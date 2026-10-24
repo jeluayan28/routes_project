@@ -108,7 +108,7 @@ describe("publicStatus", () => {
 describe("route draft validation", () => {
   const U = (n: number) => `00000000-0000-4000-8000-00000000000${n}`;
   const draft = (over: Record<string, unknown> = {}) => ({
-    code: "", name: "Test Route", transportType: "jeepney", description: "", originLabel: "A", destinationLabel: "B",
+    code: "", name: "Test Route", transportType: "minibus", description: "", originLabel: "A", destinationLabel: "B",
     directions: [{ kind: "outbound", stops: [{ stopId: U(1), boarding: null, dropoff: null }, { stopId: U(2), boarding: null, dropoff: null }], lines: [], geometrySource: "" }],
     ...over,
   });

@@ -15,7 +15,7 @@ describe("parseTripParams", () => {
   it("applies defaults", () => {
     expect(parseTripParams({ from: "A", to: "B" })).toEqual({
       status: "ok",
-      value: { from: "A", to: "B", types: ["jeepney", "multicab"], category: "regular", maxTransfers: 2, preference: "fewest-transfers" },
+      value: { from: "A", to: "B", types: ["minibus", "multicab"], category: "regular", maxTransfers: 2, preference: "fewest-transfers" },
     });
   });
 
@@ -44,7 +44,7 @@ describe("parseTripParams", () => {
   });
 
   it("round-trips through tripQuery", () => {
-    const parsed = parseTripParams({ from: "Café, Plaza", to: "stop:abc", types: "jeepney", category: "pwd", transfers: "3", pref: "shortest-walking" });
+    const parsed = parseTripParams({ from: "Café, Plaza", to: "stop:abc", types: "minibus", category: "pwd", transfers: "3", pref: "shortest-walking" });
     if (parsed.status !== "ok") throw new Error("parse failed");
     const again = parseTripParams(Object.fromEntries(new URLSearchParams(tripQuery(parsed.value))));
     expect(again).toEqual(parsed);

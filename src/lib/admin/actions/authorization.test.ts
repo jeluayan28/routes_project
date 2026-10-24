@@ -70,7 +70,7 @@ const CALLS: [string, () => Promise<{ ok: boolean }>][] = [
   ["changeFareAction", () => changeFareAction({ fareId: ID, amount: "11", effectiveFrom: "2026-07-01", source: "A source" })],
   ["endFareAction", () => endFareAction({ fareId: ID, effectiveUntil: "2026-07-01" })],
   ["setReportStatusAction", () => setReportStatusAction({ reportId: ID, status: "reviewing" })],
-  ["saveRouteAction", () => saveRouteAction(null, { name: "R", code: "", transportType: "jeepney", description: "", originLabel: "", destinationLabel: "", directions: [{ kind: "outbound", stops: [], lines: [], geometrySource: "" }] })],
+  ["saveRouteAction", () => saveRouteAction(null, { name: "R", code: "", transportType: "minibus", description: "", originLabel: "", destinationLabel: "", directions: [{ kind: "outbound", stops: [], lines: [], geometrySource: "" }] })],
   ["setRouteStatusAction", () => setRouteStatusAction(ID, "active")],
   ["markRouteOutdatedAction", () => markRouteOutdatedAction(ID)],
   ["verifyRouteAction", () => verifyRouteAction({ routeId: ID })],

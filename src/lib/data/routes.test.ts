@@ -45,7 +45,7 @@ describe("getRoutes", () => {
                 id: "r1",
                 code: "R1",
                 name: "One",
-                transport_type: "jeepney",
+                transport_type: "minibus",
                 verification_status: "verified",
                 route_stops: [
                   {

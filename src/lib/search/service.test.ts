@@ -15,7 +15,7 @@ const data = (raw: RawNetwork): SearchData => ({
 });
 
 const params = (over: Partial<TripParams> = {}): TripParams => ({
-  from: "Fixture stop A", to: "Fixture stop C", types: ["jeepney", "multicab"], category: "regular", maxTransfers: 2, preference: "fewest-transfers", ...over,
+  from: "Fixture stop A", to: "Fixture stop C", types: ["minibus", "multicab"], category: "regular", maxTransfers: 2, preference: "fewest-transfers", ...over,
 });
 
 const deps = (raw: RawNetwork, over: Partial<ServiceDeps> = {}, source: "database" | "sample" = "database"): ServiceDeps => ({
@@ -60,7 +60,7 @@ describe("a successful search", () => {
     expect(ok.status === "ok" && ok.journeys[0].fare).toMatchObject({ total: 9 });
     const none = await runTripSearch(params({ category: "student", maxTransfers: 0 }), deps(raw));
     expect(none).toMatchObject({ status: "no-journey", reason: "transfer-limit" });
-    const filtered = await runTripSearch(params({ types: ["jeepney"] }), deps(raw));
+    const filtered = await runTripSearch(params({ types: ["minibus"] }), deps(raw));
     expect(filtered.status).toBe("no-journey");
   });
 

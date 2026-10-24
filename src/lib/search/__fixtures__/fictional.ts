@@ -64,7 +64,7 @@ export function route(
     id,
     code: id,
     name: `Fixture route ${id}`,
-    transportType: opts.type ?? "jeepney",
+    transportType: opts.type ?? "minibus",
     status: opts.status ?? "verified",
     lastVerifiedAt: opts.lastVerifiedAt === undefined ? "2026-05-01T00:00:00Z" : opts.lastVerifiedAt,
     directions: [

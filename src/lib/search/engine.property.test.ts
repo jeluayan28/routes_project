@@ -47,7 +47,7 @@ function randomNetwork(seed: number): RawNetwork {
     const chosen: string[] = [];
     while (chosen.length < length && pool.length) chosen.push(pool.splice(Math.floor(r() * pool.length), 1)[0]);
     const specs = chosen.map((id) => ({ id, board: r() > 0.15, alight: r() > 0.15 }));
-    routes.push(route(`R${k}`, specs, { type: r() < 0.3 ? "multicab" : "jeepney", status: r() < 0.1 ? "unverified" : "verified" }));
+    routes.push(route(`R${k}`, specs, { type: r() < 0.3 ? "multicab" : "minibus", status: r() < 0.1 ? "unverified" : "verified" }));
     if (r() < 0.6) fares.push(flatFare(`R${k}`, 5 + Math.floor(r() * 20)));
     if (r() < 0.3 && chosen.length >= 2) fares.push(pairFare(`R${k}`, chosen[0], chosen[chosen.length - 1], 3 + Math.floor(r() * 5)));
     if (r() < 0.1) fares.push(flatFare(`R${k}`, 99, { status: "unverified" }));
@@ -157,7 +157,7 @@ describe("randomised invariants (invented networks)", () => {
   it("respects the transport filter in every leg", () => {
     for (let seed = 200; seed < 260; seed++) {
       const raw = randomNetwork(seed);
-      assertSound(raw, "S0", "S1", 2, ["jeepney"]);
+      assertSound(raw, "S0", "S1", 2, ["minibus"]);
       assertSound(raw, "S2", "S3", 2, ["multicab"]);
     }
   });

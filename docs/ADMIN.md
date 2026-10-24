@@ -150,7 +150,7 @@ instead (see below).
 |---|---|---|
 | `ref` | yes | Unique in the file. |
 | `name` | yes | |
-| `transport_type` | yes | `jeepney` or `multicab`. |
+| `transport_type` | yes | `minibus` or `multicab`. |
 | `code`, `description`, `origin_label`, `destination_label` | no | `code` must be unique (case-insensitive) in the file and the database. |
 | `sample` | no | As above. |
 
@@ -199,7 +199,7 @@ S3,[SAMPLE] Stop Three,0.0030,0.0050,,,false,true,true
 
 ```csv
 ref,code,name,transport_type,description,origin_label,destination_label,sample
-R1,SAMPLE-001,[SAMPLE] Placeholder Route,jeepney,Fictional route for testing only,Placeholder Origin,Placeholder Destination,true
+R1,SAMPLE-001,[SAMPLE] Placeholder Route,minibus,Fictional route for testing only,Placeholder Origin,Placeholder Destination,true
 ```
 
 `route_stops.csv` (the inbound direction is its own, different sequence)

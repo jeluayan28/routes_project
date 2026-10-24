@@ -256,7 +256,7 @@ isOneToOne: false
             }
           }
           Enums: {
-            "audit_action": "insert"|"update"|"delete","passenger_type": "regular"|"student"|"senior"|"pwd","report_status": "new"|"reviewing"|"resolved"|"rejected","report_type": "incorrect_route"|"incorrect_direction"|"incorrect_stop"|"incorrect_fare"|"missing_route"|"missing_stop"|"other","route_direction": "outbound"|"inbound","route_status": "draft"|"active"|"inactive","transport_type": "jeepney"|"multicab","verification_status": "unverified"|"verified"|"outdated"
+            "audit_action": "insert"|"update"|"delete","passenger_type": "regular"|"student"|"senior"|"pwd","report_status": "new"|"reviewing"|"resolved"|"rejected","report_type": "incorrect_route"|"incorrect_direction"|"incorrect_stop"|"incorrect_fare"|"missing_route"|"missing_stop"|"other","route_direction": "outbound"|"inbound","route_status": "draft"|"active"|"inactive","transport_type": "minibus"|"multicab","verification_status": "unverified"|"verified"|"outdated"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -372,7 +372,7 @@ export type CompositeTypes<
 export const Constants = {
   "public": {
           Enums: {
-            "audit_action": ["insert", "update", "delete"],"passenger_type": ["regular", "student", "senior", "pwd"],"report_status": ["new", "reviewing", "resolved", "rejected"],"report_type": ["incorrect_route", "incorrect_stop", "incorrect_fare", "missing_route", "missing_stop", "other"],"route_direction": ["outbound", "inbound"],"route_status": ["draft", "active", "inactive"],"transport_type": ["jeepney", "multicab"],"verification_status": ["unverified", "verified", "outdated"]
+            "audit_action": ["insert", "update", "delete"],"passenger_type": ["regular", "student", "senior", "pwd"],"report_status": ["new", "reviewing", "resolved", "rejected"],"report_type": ["incorrect_route", "incorrect_stop", "incorrect_fare", "missing_route", "missing_stop", "other"],"route_direction": ["outbound", "inbound"],"route_status": ["draft", "active", "inactive"],"transport_type": ["minibus", "multicab"],"verification_status": ["unverified", "verified", "outdated"]
           }
         }
 } as const

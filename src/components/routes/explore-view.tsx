@@ -31,7 +31,7 @@ export function ExploreView({
   routes,
   source,
   initialQuery = "",
-  initialTypes = ["jeepney", "multicab"],
+  initialTypes = ["minibus", "multicab"],
   initialSelectedId = null,
   trip = null,
 }: ExploreViewProps) {
@@ -53,7 +53,7 @@ export function ExploreView({
 
   const clearFilters = () => {
     setQuery("");
-    setTypes(["jeepney", "multicab"]);
+    setTypes(["minibus", "multicab"]);
   };
 
   // The one place selection changes, so list, map, dropdown and popups stay in step.
@@ -180,7 +180,7 @@ export function ExploreView({
                 <EmptyState
                   icon={SearchX}
                   title="No transport type selected"
-                  description="Turn on Jeepney, Multicab, or both in the map filter to see routes."
+                  description="Turn on Minibus, Multicab, or both in the map filter to see routes."
                   action={
                     <Button type="button" variant="outline" onClick={clearFilters}>
                       Show all types

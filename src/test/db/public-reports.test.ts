@@ -46,7 +46,7 @@ async function route(publish: boolean) {
     stops.push(rows[0].id as string);
   }
   const data = {
-    code: `RT-${++n}`, name: `Report Test Route ${n}`, transport_type: "jeepney", origin_label: "A", destination_label: "B",
+    code: `RT-${++n}`, name: `Report Test Route ${n}`, transport_type: "minibus", origin_label: "A", destination_label: "B",
     directions: [{ direction: "outbound", stops: stops.map((stop_id) => ({ stop_id })), geometry: line([0, 0], [0.01, 0.01]), geometry_source: "test" }],
   };
   const id = await asAdmin(async () => (await q("select public.save_route(null, $1::jsonb) as id", [JSON.stringify(data)])).rows[0].id as string);

@@ -29,7 +29,7 @@ set local role authenticated;
 set local request.jwt.claims = '{"sub":"bbbbbbbb-0000-0000-0000-0000000000b1","role":"authenticated"}';
 
 select is(public.is_current_user_admin(), false, 'a signed-in non-admin is not an admin');
-select throws_ok($$ select public.save_route(null, '{"name":"x","transport_type":"jeepney"}'::jsonb) $$,
+select throws_ok($$ select public.save_route(null, '{"name":"x","transport_type":"minibus"}'::jsonb) $$,
   '42501', 'Administrators only', 'non-admin cannot save routes');
 select throws_ok($$ select public.commit_import('{"batch":{}}'::jsonb) $$,
   '42501', 'Administrators only', 'non-admin cannot import');
@@ -50,7 +50,7 @@ select is(public.is_current_user_admin(), true, 'an allow-listed account is an a
 
 create temp table wf as
 select public.save_route(null, jsonb_build_object(
-  'code', 'WF-1', 'name', 'WF route', 'transport_type', 'jeepney',
+  'code', 'WF-1', 'name', 'WF route', 'transport_type', 'minibus',
   'origin_label', 'WF origin', 'destination_label', 'WF destination',
   'directions', jsonb_build_array(
     jsonb_build_object('direction', 'outbound',
@@ -71,7 +71,7 @@ select is((select extensions.geometrytype(geometry) from public.route_shapes whe
   'LINESTRING', 'geometry is stored as a PostGIS line');
 
 select throws_ok($$ select public.save_route((select id from wf), jsonb_build_object(
-    'name', 'WF route', 'transport_type', 'jeepney',
+    'name', 'WF route', 'transport_type', 'minibus',
     'directions', jsonb_build_array(jsonb_build_object('direction', 'outbound', 'stops', '[]'::jsonb,
       'geometry', '{"type":"LineString","coordinates":[[200,0],[1,1]]}'::jsonb)))) $$,
   '22023', null, 'out-of-range geometry is rejected');
@@ -94,7 +94,7 @@ select is((select count(distinct verification_status)::int from public.route_sha
 
 -- Saving without changes keeps the verification; a change drops it.
 select lives_ok($$ select public.save_route((select id from wf), jsonb_build_object(
-    'code', 'WF-1', 'name', 'WF route', 'transport_type', 'jeepney',
+    'code', 'WF-1', 'name', 'WF route', 'transport_type', 'minibus',
     'origin_label', 'WF origin', 'destination_label', 'WF destination',
     'directions', jsonb_build_array(jsonb_build_object('direction', 'outbound',
       'stops', jsonb_build_array(
@@ -138,7 +138,7 @@ select throws_ok($$ select public.verify_route(
 select throws_ok($$ select public.commit_import(jsonb_build_object(
     'batch', jsonb_build_object('id', 'cccccccc-0000-0000-0000-0000000000c2', 'source_description', 'fictional import'),
     'stops', jsonb_build_array(jsonb_build_object('ref', 's1', 'name', 'WF rollback stop', 'latitude', 0.021, 'longitude', 0.021)),
-    'routes', jsonb_build_array(jsonb_build_object('ref', 'r1', 'name', 'WF rollback route', 'transport_type', 'jeepney')),
+    'routes', jsonb_build_array(jsonb_build_object('ref', 'r1', 'name', 'WF rollback route', 'transport_type', 'minibus')),
     'route_stops', jsonb_build_array(
       jsonb_build_object('route_ref', 'r1', 'stop_ref', 's1', 'direction', 'outbound', 'stop_order', 1),
       jsonb_build_object('route_ref', 'r1', 'stop_ref', 's1', 'direction', 'outbound', 'stop_order', 2)))) $$,

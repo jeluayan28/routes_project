@@ -29,12 +29,12 @@ const S2 = "00000000-0000-4000-8000-000000000002";
 const data = (over: Partial<EditorData> = {}): EditorData => ({
   routeId: ID,
   route: {
-    id: ID, code: "T-1", name: "Existing Route", transport_type: "jeepney", description: null, origin_label: "A", destination_label: "B",
+    id: ID, code: "T-1", name: "Existing Route", transport_type: "minibus", description: null, origin_label: "A", destination_label: "B",
     status: "draft", verification_status: "unverified", last_verified_at: null, is_sample: false, import_batch_id: null, deactivation_reason: null, deactivated_at: null,
     created_at: "2026-01-01T00:00:00Z", updated_at: "2026-01-01T00:00:00Z",
   },
   draft: {
-    code: "T-1", name: "Existing Route", transportType: "jeepney", description: "", originLabel: "A", destinationLabel: "B",
+    code: "T-1", name: "Existing Route", transportType: "minibus", description: "", originLabel: "A", destinationLabel: "B",
     directions: [{ kind: "outbound", stops: [{ stopId: S1, boarding: null, dropoff: null }, { stopId: S2, boarding: null, dropoff: null }], lines: [], geometrySource: "" }],
   },
   stops: {

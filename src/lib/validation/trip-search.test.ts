@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { validateTripSearch } from "./trip-search";
 
-const valid = { from: "Place One", to: "Place Two", types: ["jeepney"] };
+const valid = { from: "Place One", to: "Place Two", types: ["minibus"] };
 
 describe("validateTripSearch", () => {
   it("accepts and trims valid input", () => {

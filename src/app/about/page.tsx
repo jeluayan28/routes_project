@@ -19,7 +19,7 @@ export default function AboutPage() {
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">About {SITE_NAME}</h1>
         <p className="text-muted-foreground">
-          A free, no-account guide to jeepney and multicab routes, stops, and fares in Butuan City.
+          A free, no-account guide to minibus and multicab routes, stops, and fares in Butuan City.
         </p>
       </header>
 

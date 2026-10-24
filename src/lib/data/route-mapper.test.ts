@@ -27,7 +27,7 @@ const route = (over: Partial<RouteRow> = {}): RouteRow => ({
   id: "r1",
   code: "R1",
   name: "Route 1",
-  transport_type: "jeepney",
+  transport_type: "minibus",
   verification_status: "verified",
   route_stops: [],
   ...over,

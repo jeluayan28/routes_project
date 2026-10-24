@@ -8,7 +8,7 @@ import { firstParam, parseTypes } from "@/lib/search-params";
 
 export const metadata: Metadata = {
   title: "Explore Routes",
-  description: "Browse jeepney and multicab routes in Butuan City on a map.",
+  description: "Browse minibus and multicab routes in Butuan City on a map.",
 };
 
 async function ExploreContent({ searchParams }: { searchParams: PageProps<"/explore">["searchParams"] }) {

@@ -46,7 +46,7 @@ Deferred until needed: react-hook-form (forms phase), a geometry helper such as 
 |---|---|
 | `places` | Named locations users can pick (landmarks, barangays). `lat/lng`, optional PostGIS `geography(Point)` |
 | `stops` | Boarding/drop-off points. `place_id?`, location, `verification_status`, `source_note` |
-| `routes` | `name`, `vehicle_type` (jeepney/multicab), `geometry` (LineString), `verification_status`, `active` |
+| `routes` | `name`, `vehicle_type` (minibus/multicab), `geometry` (LineString), `verification_status`, `active` |
 | `route_stops` | Ordered stops per route and direction: `route_id, stop_id, direction, sequence`; unique `(route_id, direction, sequence)` |
 | `fare_rules` | `route_id`, optional `from_stop_id/to_stop_id`, `fare_type` (flat/distance/segment), amounts, passenger category (regular/student/senior/PWD), `effective_from/to`, `verification_status`, `source_note` |
 | `reports` | Public correction submissions: target type/id, message, contact (optional), `status` (new/reviewed/resolved/rejected) |
@@ -72,7 +72,7 @@ Row Level Security (all tables enabled):
 ## Risks
 
 - **Data availability:** The main risk. Butuan routes and fares must come from field verification or official sources (e.g., city/LTFRB records). Without them the app is an empty shell. Plan a data-collection workflow before Phase 3.
-- **Informal routes:** Jeepney and multicab routes are often loosely defined, with flexible stops and fares that change. The model needs `effective_from/to` and "verified on" dates.
+- **Informal routes:** Minibus and multicab routes are often loosely defined, with flexible stops and fares that change. The model needs `effective_from/to` and "verified on" dates.
 - **Public report abuse:** Anonymous inserts need validation, size limits, and rate limiting (and possibly Turnstile or similar).
 - **OSM tile policy:** The public tile server is for light use only. Plan a tile provider switch before meaningful traffic.
 - **Leaflet and SSR:** Leaflet needs `window`, so maps are client-only via `next/dynamic` with `ssr: false`.

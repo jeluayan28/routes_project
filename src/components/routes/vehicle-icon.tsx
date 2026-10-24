@@ -2,7 +2,7 @@ import { Bus, Van, type LucideIcon } from "lucide-react";
 import type { VehicleType } from "@/lib/validation/transport";
 
 const ICONS: Record<VehicleType, LucideIcon> = {
-  jeepney: Bus,
+  minibus: Bus,
   multicab: Van,
 };
 

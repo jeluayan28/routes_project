@@ -14,7 +14,7 @@ import { VEHICLE_LABEL } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Fare Guide",
-  description: "Verified jeepney and multicab fares in Butuan City, with verification dates.",
+  description: "Verified minibus and multicab fares in Butuan City, with verification dates.",
 };
 
 async function FareContent() {
@@ -90,7 +90,7 @@ export default function FareGuidePage() {
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Fare Guide</h1>
         <p className="text-muted-foreground">
-          Fares for jeepneys and multicabs in Butuan City, each labelled with its verification status
+          Fares for minibuses and multicabs in Butuan City, each labelled with its verification status
           and the date it was last confirmed.
         </p>
       </header>

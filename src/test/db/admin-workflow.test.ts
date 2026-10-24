@@ -31,7 +31,7 @@ const dir = (direction: "outbound" | "inbound", stops: string[], geometry: unkno
 const routeData = (extra: Record<string, unknown> = {}) => ({
   code: `TEST-${++n}`,
   name: `Test Route ${n}`,
-  transport_type: "jeepney",
+  transport_type: "minibus",
   origin_label: "Test Origin",
   destination_label: "Test Destination",
   ...extra,
@@ -91,7 +91,7 @@ describe("who may use the workflow", () => {
 
   it("blocks non-admins from writing routes directly (RLS)", async () => {
     await expect(
-      db.as("authenticated", other, () => q("insert into public.routes (name, transport_type) values ('x','jeepney')")),
+      db.as("authenticated", other, () => q("insert into public.routes (name, transport_type) values ('x','minibus')")),
     ).rejects.toThrow(/row-level security/);
   });
 
@@ -276,7 +276,7 @@ describe("verification cannot be bypassed through the API", () => {
   it("blocks setting verified directly, on insert or update", async () => {
     const { id, a } = await completeRoute();
     await expect(asAdmin(() => q("update public.routes set verification_status='verified', last_verified_at=now() where id=$1", [id]))).rejects.toThrow(/verify_route/);
-    await expect(asAdmin(() => q("insert into public.routes (name, transport_type, verification_status, last_verified_at) values ('x','jeepney','verified',now())"))).rejects.toThrow(/verify_route/);
+    await expect(asAdmin(() => q("insert into public.routes (name, transport_type, verification_status, last_verified_at) values ('x','minibus','verified',now())"))).rejects.toThrow(/verify_route/);
     await expect(asAdmin(() => q("update public.stops set verification_status='verified', last_verified_at=now() where id=$1", [a]))).rejects.toThrow(/verify_route/);
     await expect(asAdmin(() => q("insert into public.stops (name, latitude, longitude, verification_status, last_verified_at) values ('x',1,1,'verified',now())"))).rejects.toThrow(/verify_route/);
   });
@@ -433,7 +433,7 @@ describe("commit_import", () => {
   it("rejects replaying the same batch id", async () => {
     const b = batch();
     await commit(payload({ batch: b }));
-    await expect(commit(payload({ batch: b, routes: [{ ref: "r1", code: `IMP-${++n}`, name: "Again", transport_type: "jeepney" }] }))).rejects.toThrow(/import_batches_pkey|duplicate key/);
+    await expect(commit(payload({ batch: b, routes: [{ ref: "r1", code: `IMP-${++n}`, name: "Again", transport_type: "minibus" }] }))).rejects.toThrow(/import_batches_pkey|duplicate key/);
   });
 
   it("will not touch a verified existing route", async () => {

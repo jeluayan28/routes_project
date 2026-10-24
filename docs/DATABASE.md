@@ -9,7 +9,7 @@ exist only inside `supabase/tests/`, in transactions that roll back.
 
 | Table | Purpose |
 |---|---|
-| `routes` | A jeepney/multicab line. `code` is unique when present. `status` (`draft/active/inactive`) and `verification_status` (`unverified/verified/outdated`). |
+| `routes` | A minibus/multicab line. `code` is unique when present. `status` (`draft/active/inactive`) and `verification_status` (`unverified/verified/outdated`). |
 | `stops` | A physical stop (lat/lng validated). `pickup_allowed` / `dropoff_allowed` are the defaults for the stop. |
 | `route_stops` | Ordered stops per route **and direction**. Optional per-route `boarding_allowed` / `dropoff_allowed` override (NULL = follow the stop). |
 | `route_shapes` | PostGIS `LineString`/`MultiLineString` (SRID 4326), one per route direction. |
@@ -42,7 +42,7 @@ Guards (for API roles only; the `postgres` role used by the SQL editor is not re
 
 A route has up to two directions, `outbound` (`origin_label` → `destination_label`)
 and `inbound` (the return trip). Each direction has its **own** ordered stop list
-and its **own** shape, because return trips on jeepney/multicab lines often use
+and its **own** shape, because return trips on minibus/multicab lines often use
 different streets. A one-way route simply has no `inbound` rows. The same stop can
 appear in both directions. Within one direction, `stop_order` is unique (the
 constraint is deferrable so a reorder can happen in one transaction) and a stop

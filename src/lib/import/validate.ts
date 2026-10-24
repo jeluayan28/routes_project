@@ -317,8 +317,8 @@ export function validateImport(parsed: ParsedImport, existing: ExistingData): Im
 
     if (v.name === "") fail("name is required.", "name");
     else if (v.name.length > 200) fail("name is longer than 200 characters.", "name");
-    if (v.transport_type !== "jeepney" && v.transport_type !== "multicab") {
-      fail(`transport_type "${v.transport_type}" must be jeepney or multicab.`, "transport_type");
+    if (v.transport_type !== "minibus" && v.transport_type !== "multicab") {
+      fail(`transport_type "${v.transport_type}" must be minibus or multicab.`, "transport_type");
     }
     const code = (v.code ?? "").trim();
     if (code) {

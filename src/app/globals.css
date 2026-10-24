@@ -74,7 +74,7 @@
   --secondary: #dce6e5;
   --secondary-foreground: #172d46;
   --muted: #dce6e5;
-  --muted-foreground: #4a5f74;
+  --muted-foreground: #3b4f64;
   --accent: #dce6e5;
   --accent-foreground: #172d46;
   --destructive: #c0392b;
@@ -106,7 +106,7 @@
   --link: #0b7a6e;
   --foreground: #172d46;
   --card-foreground: #172d46;
-  --muted-foreground: #4a5f74;
+  --muted-foreground: #3b4f64;
   --accent: #dce6e5;
   --accent-foreground: #172d46;
   --border: #dce6e5;
@@ -133,9 +133,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    line-height: 1.6;
+    letter-spacing: 0.005em;
   }
   html {
     @apply font-sans;
+    /* Most text here is text-sm or text-xs, so a slightly larger root makes all of it easier to read. */
+    font-size: 106.25%;
   }
 }
 

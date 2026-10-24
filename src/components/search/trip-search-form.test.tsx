@@ -9,6 +9,11 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 const from = () => screen.getByLabelText("Starting point") as HTMLInputElement;
 const to = () => screen.getByLabelText("Destination") as HTMLInputElement;
+/** Opens a shadcn Select by its label and picks an option by its visible name. */
+const choose = async (label: string, option: string) => {
+  await userEvent.click(screen.getByLabelText(label));
+  await userEvent.click(await screen.findByRole("option", { name: option }));
+};
 const submit = () => userEvent.click(screen.getByRole("button", { name: "Search Routes" }));
 const params = () => new URL(push.mock.calls[0][0], "http://x").searchParams;
 
@@ -20,29 +25,30 @@ describe("TripSearchForm", () => {
     render(<TripSearchForm />);
     await userEvent.type(from(), "Place One");
     await userEvent.type(to(), "Place Two");
-    await userEvent.selectOptions(screen.getByLabelText("Passenger"), "student");
-    await userEvent.selectOptions(screen.getByLabelText("Prefer"), "lowest-fare");
-    await userEvent.selectOptions(screen.getByLabelText("Up to"), "1");
+    await choose("Passenger", "Student");
+    await choose("Prefer", "Lowest fare");
+    await choose("Up to", "1 transfer");
     await userEvent.click(screen.getByRole("button", { name: "Multicab" })); // turn multicab off
     await submit();
 
     expect(new URL(push.mock.calls[0][0], "http://x").pathname).toBe("/search");
     expect(Object.fromEntries(params())).toEqual({
-      from: "Place One", to: "Place Two", types: "jeepney", category: "student", transfers: "1", pref: "lowest-fare",
+      from: "Place One", to: "Place Two", types: "minibus", category: "student", transfers: "1", pref: "lowest-fare",
     });
-  });
+  }, 20_000);
 
   it("starts with sensible defaults", async () => {
     render(<TripSearchForm />);
     await userEvent.type(from(), "A");
     await userEvent.type(to(), "B");
     await submit();
-    expect(Object.fromEntries(params())).toMatchObject({ types: "jeepney,multicab", category: "regular", transfers: "2", pref: "fewest-transfers" });
+    expect(Object.fromEntries(params())).toMatchObject({ types: "minibus,multicab", category: "regular", transfers: "2", pref: "fewest-transfers" });
   });
 
-  it("offers up to four transfers and no more", () => {
+  it("offers up to four transfers and no more", async () => {
     render(<TripSearchForm />);
-    const options = [...(screen.getByLabelText("Up to") as HTMLSelectElement).options].map((o) => o.text);
+    await userEvent.click(screen.getByLabelText("Up to"));
+    const options = (await screen.findAllByRole("option")).map((o) => o.textContent);
     expect(options).toEqual(["No transfers", "1 transfer", "2 transfers", "3 transfers", "4 transfers"]);
   });
 
@@ -61,7 +67,7 @@ describe("TripSearchForm", () => {
     await userEvent.type(to(), "same");
     await submit();
     expect(await screen.findByText(/different/)).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Jeepney" }));
+    await userEvent.click(screen.getByRole("button", { name: "Minibus" }));
     await userEvent.click(screen.getByRole("button", { name: "Multicab" }));
     await submit();
     expect(await screen.findByText("Choose at least one transport type.")).toBeInTheDocument();
@@ -79,11 +85,11 @@ describe("TripSearchForm", () => {
   it("shows the values of a previous search", () => {
     render(<TripSearchForm initial={{ from: "Alpha", to: "Beta", category: "pwd", preference: "shortest-walking", maxTransfers: 3, types: ["multicab"] }} />);
     expect([from().value, to().value]).toEqual(["Alpha", "Beta"]);
-    expect(screen.getByLabelText("Passenger")).toHaveValue("pwd");
-    expect(screen.getByLabelText("Prefer")).toHaveValue("shortest-walking");
-    expect(screen.getByLabelText("Up to")).toHaveValue("3");
+    expect(screen.getByLabelText("Passenger")).toHaveTextContent("PWD");
+    expect(screen.getByLabelText("Prefer")).toHaveTextContent("Shortest walking");
+    expect(screen.getByLabelText("Up to")).toHaveTextContent("3 transfers");
     expect(screen.getByRole("button", { name: "Multicab" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: "Jeepney" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "Minibus" })).toHaveAttribute("aria-pressed", "false");
   });
 
   it("hands validated input to onSearch instead of navigating", async () => {

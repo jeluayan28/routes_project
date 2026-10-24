@@ -6,6 +6,7 @@ import { ArrowUpDown, LocateFixed, Search } from "lucide-react";
 import { PlaceInput } from "@/components/search/place-input";
 import { TransportFilter } from "@/components/search/transport-filter";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FARE_CATEGORY_LABEL } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { tripQuery } from "@/lib/search/params";
@@ -29,8 +30,33 @@ const PREFERENCE_LABEL: Record<Preference, string> = {
   "shortest-walking": "Shortest walking",
 };
 
-const selectClass =
-  "h-10 w-full rounded-lg border border-input bg-card px-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+type Option = { value: string; label: string };
+
+/** A labelled shadcn Select. Values are strings; callers convert. */
+function OptionSelect({ id, label, value, options, onChange }: { id: string; label: string; value: string; options: Option[]; onChange: (value: string) => void }) {
+  return (
+    <div className="space-y-1.5">
+      <label htmlFor={id} className="text-sm font-medium">{label}</label>
+      <Select value={value} items={options} onValueChange={(next) => next !== null && onChange(next)}>
+        <SelectTrigger id={id} className="h-10 w-full bg-card">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent alignItemWithTrigger={false}>
+          {options.map((o) => (
+            <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
+const CATEGORY_OPTIONS: Option[] = fareCategorySchema.options.map((c) => ({ value: c, label: FARE_CATEGORY_LABEL[c] }));
+const PREFERENCE_OPTIONS: Option[] = (Object.keys(PREFERENCE_LABEL) as Preference[]).map((p) => ({ value: p, label: PREFERENCE_LABEL[p] }));
+const TRANSFER_OPTIONS: Option[] = Array.from({ length: HARD_MAX_TRANSFERS + 1 }, (_, n) => ({
+  value: String(n),
+  label: n === 0 ? "No transfers" : `${n} transfer${n === 1 ? "" : "s"}`,
+}));
 
 export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSearchFormProps) {
   const hero = layout === "hero";
@@ -39,7 +65,7 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
   const formRef = useRef<HTMLFormElement>(null);
   const [from, setFrom] = useState(initial?.from ?? "");
   const [to, setTo] = useState(initial?.to ?? "");
-  const [types, setTypes] = useState<VehicleType[]>(initial?.types ?? ["jeepney", "multicab"]);
+  const [types, setTypes] = useState<VehicleType[]>(initial?.types ?? ["minibus", "multicab"]);
   const [category, setCategory] = useState<FareCategory>(initial?.category ?? "regular");
   const [maxTransfers, setMaxTransfers] = useState(initial?.maxTransfers ?? 2);
   const [preference, setPreference] = useState<Preference>(initial?.preference ?? "fewest-transfers");
@@ -102,31 +128,10 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
 
   const options = (
     <>
-      <div className="grid gap-3 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <label htmlFor={`${uid}-category`} className="text-sm font-medium">Passenger</label>
-          <select id={`${uid}-category`} className={selectClass} value={category} onChange={(e) => setCategory(fareCategorySchema.parse(e.target.value))}>
-            {fareCategorySchema.options.map((c) => (
-              <option key={c} value={c}>{FARE_CATEGORY_LABEL[c]}</option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <label htmlFor={`${uid}-pref`} className="text-sm font-medium">Prefer</label>
-          <select id={`${uid}-pref`} className={selectClass} value={preference} onChange={(e) => setPreference(e.target.value as Preference)}>
-            {(Object.keys(PREFERENCE_LABEL) as Preference[]).map((p) => (
-              <option key={p} value={p}>{PREFERENCE_LABEL[p]}</option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-1.5">
-          <label htmlFor={`${uid}-transfers`} className="text-sm font-medium">Up to</label>
-          <select id={`${uid}-transfers`} className={selectClass} value={maxTransfers} onChange={(e) => setMaxTransfers(Number(e.target.value))}>
-            {Array.from({ length: HARD_MAX_TRANSFERS + 1 }, (_, n) => (
-              <option key={n} value={n}>{n === 0 ? "No transfers" : `${n} transfer${n === 1 ? "" : "s"}`}</option>
-            ))}
-          </select>
-        </div>
+      <div className={cn("grid gap-3", !hero && "sm:grid-cols-3")}>
+        <OptionSelect id={`${uid}-category`} label="Passenger" value={category} options={CATEGORY_OPTIONS} onChange={(v) => setCategory(fareCategorySchema.parse(v))} />
+        <OptionSelect id={`${uid}-pref`} label="Prefer" value={preference} options={PREFERENCE_OPTIONS} onChange={(v) => setPreference(v as Preference)} />
+        <OptionSelect id={`${uid}-transfers`} label="Up to" value={String(maxTransfers)} options={TRANSFER_OPTIONS} onChange={(v) => setMaxTransfers(Number(v))} />
       </div>
       {hero && transportFilter}
     </>

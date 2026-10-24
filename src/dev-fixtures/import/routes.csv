@@ -1,2 +1,2 @@
 ref,code,name,transport_type,description,origin_label,destination_label,sample
-R1,SAMPLE-001,[SAMPLE] Placeholder Route,jeepney,Fictional route for testing only,Placeholder Origin,Placeholder Destination,true
+R1,SAMPLE-001,[SAMPLE] Placeholder Route,minibus,Fictional route for testing only,Placeholder Origin,Placeholder Destination,true

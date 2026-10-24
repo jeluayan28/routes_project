@@ -19,7 +19,7 @@ vi.mock("@/lib/admin/actions/routes", () => ({
 
 const ID = "00000000-0000-4000-8000-0000000000aa";
 const route = (over: Partial<RouteRow> = {}): RouteRow => ({
-  id: ID, code: null, name: "Test Route", transport_type: "jeepney", description: null, origin_label: "A", destination_label: "B",
+  id: ID, code: null, name: "Test Route", transport_type: "minibus", description: null, origin_label: "A", destination_label: "B",
   status: "draft", verification_status: "unverified", last_verified_at: null, is_sample: false, import_batch_id: null, deactivation_reason: null, deactivated_at: null,
   created_at: "2026-01-01T00:00:00Z", updated_at: "2026-01-01T00:00:00Z", ...over,
 });

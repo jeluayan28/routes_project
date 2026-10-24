@@ -159,7 +159,7 @@ describe("fare overlap check", () => {
 
 describe("route preview model", () => {
   const draft: RouteDraft = {
-    code: "", name: "Test route", transportType: "jeepney", description: "", originLabel: "", destinationLabel: "",
+    code: "", name: "Test route", transportType: "minibus", description: "", originLabel: "", destinationLabel: "",
     directions: [{ kind: "outbound", stops: [{ stopId: "a", boarding: null, dropoff: false }, { stopId: "gone", boarding: null, dropoff: null }], lines: [[{ lat: 1, lng: 1 }, { lat: 2, lng: 2 }]], geometrySource: "" }],
   };
   const stops = { a: { id: "a", name: "A", latitude: 1, longitude: 1, status: "unverified" as const } };

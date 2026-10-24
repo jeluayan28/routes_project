@@ -16,7 +16,7 @@ vi.mock("@/components/search/trip-map-lazy", () => ({
   },
 }));
 
-const PARAMS: TripParams = { from: "Fixture stop A", to: "Fixture stop E", types: ["jeepney", "multicab"], category: "regular", maxTransfers: 2, preference: "fewest-transfers" };
+const PARAMS: TripParams = { from: "Fixture stop A", to: "Fixture stop E", types: ["minibus", "multicab"], category: "regular", maxTransfers: 2, preference: "fewest-transfers" };
 
 const search = (raw: RawNetwork, over: Partial<TripParams> = {}, source: "database" | "sample" = "database") =>
   runTripSearch({ ...PARAMS, ...over }, {
@@ -48,9 +48,9 @@ describe("journeys", () => {
     expect(within(card).getByText(/R1 · Fixture route R1/)).toBeInTheDocument();
     expect(within(card).getByText("₱8.00")).toBeInTheDocument();
     expect(within(card).getByText("₱7.50")).toBeInTheDocument();
-    expect(within(card).getByText(/Board Jeepney R1 \(Fixture route R1\) at Fixture stop A, toward Fixture stop C\. Get off at Fixture stop C after 2 stops\./)).toBeInTheDocument();
+    expect(within(card).getByText(/Board Minibus R1 \(Fixture route R1\) at Fixture stop A, toward Fixture stop C\. Get off at Fixture stop C after 2 stops\./)).toBeInTheDocument();
     expect(within(card).getByText("Transfer at Fixture stop C.")).toBeInTheDocument();
-    expect(within(card).getByText(/Board Jeepney R2/)).toBeInTheDocument();
+    expect(within(card).getByText(/Board Minibus R2/)).toBeInTheDocument();
     expect(within(card).getByText("1 transfer", { exact: false })).toBeInTheDocument();
   });
 

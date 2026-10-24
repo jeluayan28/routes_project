@@ -39,7 +39,7 @@ draws **no line**; lines are never inferred from stops. The UI says so.
 | Overlapping routes: clicking a shared road asks which route | `route-lines.tsx`, `routesNearPoint` |
 | Stop markers (keyboard-focusable) with popup: name, routes, boarding/drop-off, verification status | `stop-markers.tsx` |
 | Zoom, return to Butuan view, fit selected route, clear selection | `map-controls.tsx` |
-| Jeepney / Multicab filter and route picker (synced with the list) | `map-toolbar.tsx`, `explore-view.tsx` |
+| Minibus / Multicab filter and route picker (synced with the list) | `map-toolbar.tsx`, `explore-view.tsx` |
 | Loading, empty, error, tile-failure states | `map-status.tsx` |
 | Fit on selection; re-fit on container resize | `route-map.tsx` |
 
@@ -67,7 +67,7 @@ NEXT_PUBLIC_MAP_TILE_ATTRIBUTION=&copy; <a href="https://www.openstreetmap.org/c
 ```
 
 A custom URL without attribution (or not https / missing `{z}{x}{y}`) is ignored.
-No Google Maps APIs are used. OSM does not contain Butuan's jeepney/multicab
+No Google Maps APIs are used. OSM does not contain Butuan's minibus/multicab
 routes; all transport data comes from the database.
 
 ## Development fixtures

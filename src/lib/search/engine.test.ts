@@ -18,7 +18,7 @@ describe("direct trips", () => {
     expect(j.summary).toMatchObject({ transfers: 0, walkingMeters: 0, routeIds: ["R1"], stopsTravelled: 2 });
     expect(ride).toMatchObject({ routeId: "R1", board: { stopId: "A" }, alight: { stopId: "C" }, stopsTravelled: 2 });
     expect(ride.intermediateStops).toEqual(["Fixture stop B"]);
-    expect(ride.instruction).toBe("Board Jeepney R1 (Fixture route R1) at Fixture stop A, toward Fixture stop D. Get off at Fixture stop C after 2 stops.");
+    expect(ride.instruction).toBe("Board Minibus R1 (Fixture route R1) at Fixture stop A, toward Fixture stop D. Get off at Fixture stop C after 2 stops.");
   });
 
   it("does not add a walk when the origin and destination are the stops themselves", () => {
@@ -263,7 +263,7 @@ describe("transfers", () => {
     const chain = [route("R1", ["A", "B"]), route("R2", ["B", "C"])];
     const [j] = journeys(run(network(chain), "A", "C"));
     expect(j.steps.filter((s) => s.type === "walk")).toHaveLength(1);
-    expect(rides(j).map((r) => r.instruction.split(" at ")[0])).toEqual(["Board Jeepney R1 (Fixture route R1)", "Board Jeepney R2 (Fixture route R2)"]);
+    expect(rides(j).map((r) => r.instruction.split(" at ")[0])).toEqual(["Board Minibus R1 (Fixture route R1)", "Board Minibus R2 (Fixture route R2)"]);
   });
 });
 
@@ -341,7 +341,7 @@ describe("duplicate routes", () => {
     expect(journeys(run(raw, "A", "C", { preference: "lowest-fare" })).map((j) => j.fare.status === "complete" && j.fare.total)).toEqual([10, 12]);
   });
 
-  it("does not fold a multicab into a jeepney", () => {
+  it("does not fold a multicab into a minibus", () => {
     const raw = network([route("R1", ["A", "B"]), route("R1m", ["A", "B"], { type: "multicab" })]);
     expect(journeys(run(raw, "A", "B"))).toHaveLength(2);
   });
@@ -421,13 +421,13 @@ describe("failure states", () => {
   it("reports when the transport filter leaves nothing", () => {
     const o = noJourney(run(raw, "A", "C", { transportTypes: ["multicab"] }));
     expect(o.reason).toBe("no-routes-for-filters");
-    expect(journeys(run(raw, "A", "C", { transportTypes: ["jeepney"] }))).toHaveLength(1);
+    expect(journeys(run(raw, "A", "C", { transportTypes: ["minibus"] }))).toHaveLength(1);
   });
 
   it("applies the transport filter to every leg", () => {
     const mixed = network([route("R1", ["A", "B", "C"]), route("R2", ["C", "D"], { type: "multicab" })]);
-    expect(noJourney(run(mixed, "A", "D", { transportTypes: ["jeepney"] })).reason).toMatch(/no-route|no-alighting/);
-    expect(journeys(run(mixed, "A", "D", { transportTypes: ["jeepney", "multicab"] }))).toHaveLength(1);
+    expect(noJourney(run(mixed, "A", "D", { transportTypes: ["minibus"] })).reason).toMatch(/no-route|no-alighting/);
+    expect(journeys(run(mixed, "A", "D", { transportTypes: ["minibus", "multicab"] }))).toHaveLength(1);
   });
 
   it("treats the same place as no trip", () => {
@@ -468,7 +468,7 @@ describe("data integrity", () => {
     expect(net.edges.map((e) => `${e.lineId}:${e.boardingStopId}>${e.dropoffStopId}`)).toEqual([
       "R1:outbound:A>B", "R1:outbound:B>C", "R1:inbound:C>A",
     ]);
-    expect(net.edges[0]).toMatchObject({ routeId: "R1", transportType: "jeepney", verification: "verified" });
+    expect(net.edges[0]).toMatchObject({ routeId: "R1", transportType: "minibus", verification: "verified" });
   });
 
   it("does not search a route that is verified only on paper (unverified status)", () => {

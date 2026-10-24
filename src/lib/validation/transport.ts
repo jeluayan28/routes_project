@@ -12,7 +12,7 @@ export const verificationStatusSchema = z.enum([
 ]);
 export type VerificationStatus = z.infer<typeof verificationStatusSchema>;
 
-export const vehicleTypeSchema = z.enum(["jeepney", "multicab"]);
+export const vehicleTypeSchema = z.enum(["minibus", "multicab"]);
 export type VehicleType = z.infer<typeof vehicleTypeSchema>;
 
 export const latitudeSchema = z.number().min(-90).max(90);

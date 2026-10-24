@@ -30,7 +30,7 @@ const TABS: { key: EditorTab; label: string; needsSaved?: boolean }[] = [
 ];
 
 const BLANK: RouteDraft = {
-  code: "", name: "", transportType: "jeepney", description: "", originLabel: "", destinationLabel: "",
+  code: "", name: "", transportType: "minibus", description: "", originLabel: "", destinationLabel: "",
   directions: [{ kind: "outbound", stops: [], lines: [], geometrySource: "" }],
 };
 

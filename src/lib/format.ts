@@ -2,7 +2,7 @@ import type { FareCategory } from "@/lib/validation/route";
 import type { VehicleType } from "@/lib/validation/transport";
 
 export const VEHICLE_LABEL: Record<VehicleType, string> = {
-  jeepney: "Jeepney",
+  minibus: "Minibus",
   multicab: "Multicab",
 };
 

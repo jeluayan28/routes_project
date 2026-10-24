@@ -3,7 +3,7 @@ import { todayInManila } from "@/lib/dates";
 
 /** What an administrator confirms when verifying a route. Keys match public.verify_route(). */
 export const VERIFICATION_CHECKS = [
-  { key: "transport_type", label: "Transport type (jeepney or multicab) is correct" },
+  { key: "transport_type", label: "Transport type (minibus or multicab) is correct" },
   { key: "name_direction", label: "Route name and each direction are correct" },
   { key: "endpoints", label: "Starting and ending points are correct" },
   { key: "stops", label: "Every intermediate stop is correct and in the right order" },

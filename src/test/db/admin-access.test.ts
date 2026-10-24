@@ -46,7 +46,7 @@ async function stop() {
 async function route() {
   const stops = [await stop(), await stop()];
   const data = {
-    code: `AT-${++n}`, name: `Access Test Route ${n}`, transport_type: "jeepney", origin_label: "A", destination_label: "B",
+    code: `AT-${++n}`, name: `Access Test Route ${n}`, transport_type: "minibus", origin_label: "A", destination_label: "B",
     directions: [{ direction: "outbound", stops: stops.map((stop_id) => ({ stop_id })), geometry: line([0, 0], [0.01, 0.01]), geometry_source: "test" }],
   };
   const id = await asAdmin(async () => (await q("select public.save_route(null, $1::jsonb) as id", [JSON.stringify(data)])).rows[0].id as string);
@@ -87,7 +87,7 @@ describe("transport data", () => {
   it("cannot be written by non-administrators or visitors", async () => {
     const { id, stops } = await route();
     for (const as of [asOther, asAnon]) {
-      await expect(as(() => q("insert into public.routes (name, transport_type) values ('x', 'jeepney')"))).rejects.toThrow();
+      await expect(as(() => q("insert into public.routes (name, transport_type) values ('x', 'minibus')"))).rejects.toThrow();
       await expect(as(() => q("insert into public.stops (name, latitude, longitude) values ('x', 1, 1)"))).rejects.toThrow();
       await expect(as(() => q("insert into public.fare_rules (route_id, amount, effective_from) values ($1, 1, '2026-01-01')", [id]))).rejects.toThrow();
       await expect(as(() => q("insert into public.landmarks (name, category, latitude, longitude) values ('x', 'x', 1, 1)"))).rejects.toThrow();

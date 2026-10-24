@@ -30,7 +30,7 @@ const hasError = (r: ReturnType<typeof run>, re: RegExp, line?: number) =>
 
 // In-service-area fictional coordinates so tests are not drowned in warnings.
 const STOPS = csv("ref,name,latitude,longitude", "A,Alpha Stop,8.9500,125.5400", "B,Bravo Stop,8.9600,125.5500", "C,Charlie Stop,8.9700,125.5600");
-const ROUTES = csv("ref,name,transport_type,code", "R,Test Route,jeepney,T-1");
+const ROUTES = csv("ref,name,transport_type,code", "R,Test Route,minibus,T-1");
 const RS = (...rows: string[]) => csv("route_ref,direction,stop_order,stop_ref", ...rows);
 const GOOD_RS = RS("R,outbound,1,A", "R,outbound,2,B", "R,outbound,3,C");
 const base = (over: ImportFiles = {}): ImportFiles => ({ stops: STOPS, routes: ROUTES, route_stops: GOOD_RS, ...over });
@@ -39,7 +39,7 @@ const U1 = "11111111-1111-4111-8111-111111111111";
 const U2 = "22222222-2222-4222-8222-222222222222";
 const existing = (over: Partial<ExistingData> = {}): ExistingData => ({ ...EMPTY_EXISTING, ...over });
 const dbRoute = (id = U1, over: Record<string, string | null> = {}) => ({
-  id, code: null, name: "Existing Route", transport_type: "jeepney", verification_status: "unverified", ...over,
+  id, code: null, name: "Existing Route", transport_type: "minibus", verification_status: "unverified", ...over,
 });
 
 describe("the sample fixture", () => {
@@ -59,7 +59,7 @@ describe("the sample fixture", () => {
   });
 
   it("treats a [SAMPLE]/SAMPLE name as a sample even without the column", () => {
-    const r = run(base({ routes: csv("ref,name,transport_type", "R,[Sample] Thing,jeepney") }));
+    const r = run(base({ routes: csv("ref,name,transport_type", "R,[Sample] Thing,minibus") }));
     expect(r.payload!.routes[0].is_sample).toBe(true);
   });
 });
@@ -87,7 +87,7 @@ describe("a valid import", () => {
 
 describe("column validation", () => {
   it("rejects unknown columns, with a hint for verification columns", () => {
-    const r = run({ routes: csv("ref,name,transport_type,verification_status", "R,X,jeepney,verified") });
+    const r = run({ routes: csv("ref,name,transport_type,verification_status", "R,X,minibus,verified") });
     expect(hasError(r, /Unknown column "verification_status".*unverified draft/, 1)).toBe(true);
     expect(r.payload).toBeNull();
   });
@@ -173,26 +173,26 @@ describe("routes", () => {
   const routes = (...rows: string[]) => run({ routes: csv("ref,name,transport_type,code", ...rows) });
 
   it("rejects an unknown transport type", () => {
-    expect(hasError(routes("R,X,tricycle,"), /must be jeepney or multicab/, 2)).toBe(true);
+    expect(hasError(routes("R,X,tricycle,"), /must be minibus or multicab/, 2)).toBe(true);
   });
 
   it("rejects duplicate codes in the file (case-insensitively)", () => {
-    expect(hasError(routes("R1,A,jeepney,AB-1", "R2,B,jeepney,ab-1"), /already used on line 2/, 3)).toBe(true);
+    expect(hasError(routes("R1,A,minibus,AB-1", "R2,B,minibus,ab-1"), /already used on line 2/, 3)).toBe(true);
   });
 
   it("rejects a code that already exists, without overwriting", () => {
-    const r = run({ routes: csv("ref,name,transport_type,code", "R,X,jeepney,EX-1") }, existing({ routes: [dbRoute(U1, { code: "ex-1" })] }));
+    const r = run({ routes: csv("ref,name,transport_type,code", "R,X,minibus,EX-1") }, existing({ routes: [dbRoute(U1, { code: "ex-1" })] }));
     expect(hasError(r, /already exists in the database.*never overwrite/)).toBe(true);
   });
 
   it("warns about a probable duplicate name and type", () => {
-    const r = run({ routes: csv("ref,name,transport_type", "R,existing  route,jeepney") }, existing({ routes: [dbRoute()] }));
+    const r = run({ routes: csv("ref,name,transport_type", "R,existing  route,minibus") }, existing({ routes: [dbRoute()] }));
     expect(errors(r)).toEqual([]);
     expect(warnings(r).some((w) => /Is this a duplicate/.test(w.message))).toBe(true);
   });
 
   it("warns that a route without stops is incomplete, and rejects inbound without outbound", () => {
-    expect(warnings(run({ routes: csv("ref,name,transport_type", "R,X,jeepney") })).some((w) => /no stops in this import/.test(w.message))).toBe(true);
+    expect(warnings(run({ routes: csv("ref,name,transport_type", "R,X,minibus") })).some((w) => /no stops in this import/.test(w.message))).toBe(true);
     const r = run(base({ route_stops: RS("R,inbound,1,A", "R,inbound,2,B") }));
     expect(hasError(r, /inbound stops but no outbound/)).toBe(true);
   });

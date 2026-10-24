@@ -6,7 +6,7 @@ begin;
 select no_plan();
 
 insert into public.routes (id, code, name, transport_type, status, verification_status, last_verified_at) values
-  ('11111111-0000-0000-0000-000000000001', 'T-1', 'Test route', 'jeepney', 'active', 'verified', now());
+  ('11111111-0000-0000-0000-000000000001', 'T-1', 'Test route', 'minibus', 'active', 'verified', now());
 insert into public.stops (id, name, latitude, longitude) values
   ('22222222-0000-0000-0000-000000000001', 'Test stop 1', 8.95, 125.54),
   ('22222222-0000-0000-0000-000000000002', 'Test stop 2', 8.96, 125.55),
@@ -23,14 +23,14 @@ select throws_ok($$ insert into public.landmarks (name, category, latitude, long
   values ('x', 'test', 0, -181) $$, '23514', null, 'landmark longitude range enforced');
 
 -- Routes
-select throws_ok($$ insert into public.routes (code, name, transport_type) values ('T-1', 'dup', 'jeepney') $$,
+select throws_ok($$ insert into public.routes (code, name, transport_type) values ('T-1', 'dup', 'minibus') $$,
   '23505', null, 'route code is unique');
-select lives_ok($$ insert into public.routes (name, transport_type) values ('no code a', 'jeepney'),
-  ('no code b', 'jeepney') $$, 'route code is optional (multiple NULLs ok)');
+select lives_ok($$ insert into public.routes (name, transport_type) values ('no code a', 'minibus'),
+  ('no code b', 'minibus') $$, 'route code is optional (multiple NULLs ok)');
 select throws_ok($$ insert into public.routes (name, transport_type) values ('x', 'tricycle') $$,
   '22P02', null, 'unknown transport type rejected');
 select throws_ok($$ insert into public.routes (name, transport_type, verification_status)
-  values ('x', 'jeepney', 'verified') $$,
+  values ('x', 'minibus', 'verified') $$,
   '23514', null, 'verified record requires a verification date');
 
 -- Route stops and direction

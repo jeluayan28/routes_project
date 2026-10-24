@@ -9,7 +9,7 @@ import { assembleSearchData, loadSearchData, type SearchRows } from "@/lib/searc
 
 /** Fictional rows shaped like the database's. */
 const rows = (over: Partial<SearchRows> = {}): SearchRows => ({
-  routes: [{ id: "R1", code: "F-1", name: "Fixture route", transport_type: "jeepney", status: "active", verification_status: "verified", last_verified_at: "2026-05-01T00:00:00Z" }],
+  routes: [{ id: "R1", code: "F-1", name: "Fixture route", transport_type: "minibus", status: "active", verification_status: "verified", last_verified_at: "2026-05-01T00:00:00Z" }],
   stops: ["A", "B", "C"].map((id, i) => ({
     id, name: `Fixture stop ${id}`, latitude: 0.1, longitude: 0.1 + i * 0.01,
     pickup_allowed: true, dropoff_allowed: true, verification_status: "verified" as const,
