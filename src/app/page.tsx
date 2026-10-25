@@ -95,11 +95,11 @@ function Hero() {
         */}
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 -z-10 w-full bg-cover bg-center lg:w-[max(52%,calc((100%_-_72rem)/2_+_37rem))] lg:[border-radius:0_30%_30%_0/0_50%_50%_0]"
+          className="absolute inset-y-0 left-0 -z-10 w-full bg-cover bg-center md:w-[max(52%,calc((100%_-_72rem)/2_+_37rem))] md:[border-radius:0_30%_30%_0/0_50%_50%_0]"
           style={{ backgroundImage: `linear-gradient(90deg, rgb(23 45 70 / 0.85), rgb(23 45 70 / 0.3)), url(${HERO_IMAGE})` }}
         />
-        <div className="mx-auto grid w-full max-w-6xl lg:min-h-[34rem] lg:grid-cols-[1.15fr_1fr]">
-          <div className="flex min-h-64 items-center px-4 py-12 lg:py-10">
+        <div className="mx-auto grid w-full max-w-6xl md:min-h-[34rem] md:grid-cols-[1.15fr_1fr]">
+          <div className="flex min-h-64 items-center px-4 py-12 md:py-10">
             <div className="space-y-4">
               <h1 id="hero-heading" className="text-5xl leading-[1.05] font-semibold tracking-tight [text-shadow:0_2px_14px_rgb(0_0_0/0.55)] sm:text-6xl">
                 Find your way
@@ -111,7 +111,7 @@ function Hero() {
             </div>
           </div>
 
-          <div className="space-y-4 px-4 py-8 sm:px-8 lg:py-10">
+          <div className="space-y-4 px-4 py-8 sm:px-8 md:px-5 md:py-10">
             <TripSearchForm layout="hero" />
             <ul className="grid grid-cols-2 gap-3">
               {HERO_LINKS.map(({ href, title, icon: Icon }) => (
