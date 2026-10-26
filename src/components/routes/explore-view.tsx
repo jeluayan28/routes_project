@@ -65,7 +65,7 @@ export function ExploreView({
 
   return (
     <div className="flex h-[calc(100svh-3.5rem)] min-h-[34rem] flex-col lg:flex-row">
-      <div className="relative min-h-[16rem] flex-1 lg:min-h-0">
+      <div className="relative min-h-[18rem] flex-1 lg:min-h-0">
         <RouteMapLazy
           routes={mapRoutes}
           selectedId={selectedId}
@@ -98,14 +98,14 @@ export function ExploreView({
 
       <aside
         aria-label="Routes"
-        className="flex max-h-[55svh] shrink-0 flex-col rounded-t-2xl border-t bg-background shadow-[0_-4px_16px_rgba(15,27,61,0.12)] lg:order-first lg:max-h-none lg:w-[26rem] lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none"
+        className="flex max-h-[48svh] shrink-0 flex-col rounded-t-2xl border-t bg-background shadow-[0_-4px_16px_rgba(15,27,61,0.12)] lg:order-first lg:max-h-none lg:w-[26rem] xl:w-[28rem] lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none"
       >
         <button
           type="button"
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={() => setExpanded((v) => !v)}
-          className="flex w-full items-center justify-between gap-2 rounded-t-2xl px-4 py-3 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+          className="flex min-h-12 w-full items-center justify-between gap-2 rounded-t-2xl px-4 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
         >
           <span className="font-semibold">
             {selected ? selected.name : "Routes"}{" "}
@@ -125,8 +125,8 @@ export function ExploreView({
             <div role="note" className="flex items-start gap-2 rounded-lg border bg-card px-3 py-2 text-sm">
               <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-link" />
               <p>
-                You searched <strong className="text-green-700">{trip.from}</strong> to{" "}
-                <strong className="text-red-700">{trip.to}</strong>. Trip planning isn&apos;t available
+                You searched <strong>{trip.from}</strong> to{" "}
+                <strong>{trip.to}</strong>. Trip planning isn&apos;t available
                 yet, so you can browse and compare routes below.
               </p>
             </div>
@@ -134,7 +134,7 @@ export function ExploreView({
 
           {selected ? (
             <div className="space-y-4">
-              <Button type="button" variant="ghost" size="sm" onClick={() => select(null)}>
+              <Button type="button" variant="ghost" className="-ml-2 h-10 px-2" onClick={() => select(null)}>
                 <ArrowLeft aria-hidden="true" />
                 Clear selection
               </Button>
@@ -161,7 +161,7 @@ export function ExploreView({
                     value={query}
                     maxLength={100}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="h-10 bg-card pl-9"
+                    className="h-11 bg-card pl-9"
                   />
                 </div>
               </div>
@@ -202,7 +202,7 @@ export function ExploreView({
                 <RouteList routes={visible} selectedId={selectedId} onSelect={select} label="Routes" />
               )}
 
-              <Link href="/fares" className={cn(buttonVariants({ variant: "link" }), "px-0")}>
+              <Link href="/fares" className={cn(buttonVariants({ variant: "link" }), "h-11 px-0")}>
                 See the fare guide
               </Link>
             </>

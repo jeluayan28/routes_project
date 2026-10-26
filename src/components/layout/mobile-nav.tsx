@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Menu, Search } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { NAV_ITEMS, isActivePath } from "@/lib/navigation";
+import { NAV_ITEMS, SEARCH_ITEM, isActivePath } from "@/lib/navigation";
 import { SITE_NAME } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,16 @@ export function MobileNav({ className }: { className?: string }) {
         <SheetHeader>
           <SheetTitle>{SITE_NAME}</SheetTitle>
         </SheetHeader>
+        <div className="px-4 pb-2">
+          <Link
+            href={SEARCH_ITEM.href}
+            onClick={() => setOpen(false)}
+            className={cn(buttonVariants({ size: "lg" }), "h-12 w-full text-base")}
+          >
+            <Search aria-hidden="true" />
+            {SEARCH_ITEM.label}
+          </Link>
+        </div>
         <nav aria-label="Mobile" className="px-2">
           <ul className="space-y-1">
             {NAV_ITEMS.map((item) => {
@@ -34,7 +44,7 @@ export function MobileNav({ className }: { className?: string }) {
                     onClick={() => setOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "block rounded-md px-3 py-3 text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      "flex min-h-12 items-center rounded-md px-3 text-base font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
                       active ? "bg-accent text-link" : "hover:bg-accent",
                     )}
                   >

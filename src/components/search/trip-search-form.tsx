@@ -147,7 +147,7 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
       className="-my-2 inline-flex min-h-10 items-center gap-1.5 rounded px-1 text-sm font-medium text-link underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
     >
       <LocateFixed aria-hidden="true" className="size-4" />
-      {locating === "busy" ? "Finding you…" : "Use my location"}
+      <span className="whitespace-nowrap max-[24rem]:sr-only">{locating === "busy" ? "Finding you…" : "Use my location"}</span>
     </button>
   );
 
@@ -207,7 +207,7 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
         </p>
       )}
 
-      {stacked && transportFilter}
+      {hero && transportFilter}
 
       {stacked ? (
         <details open={errors.types ? true : undefined} className="group rounded-lg border border-dashed px-3">
@@ -221,12 +221,12 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
         options
       )}
 
-      <div className={cn("flex flex-col gap-3", !stacked && "sm:flex-row sm:items-center sm:justify-between")}>
-        {!stacked && transportFilter}
+      <div className={cn("flex flex-col gap-3", !hero && "sm:flex-row sm:items-center sm:justify-between")}>
+        {!hero && transportFilter}
         <Button
           type="submit"
           size="lg"
-          className={cn("h-12 text-base sm:min-w-40", stacked && "w-full", hero && "bg-gold font-semibold text-gold-foreground hover:bg-gold/90")}
+          className={cn("h-12 text-base sm:min-w-40", hero && "w-full", panel && "w-full sm:w-auto", hero && "bg-gold font-semibold text-gold-foreground hover:bg-gold/90")}
         >
           <Search aria-hidden="true" />
           Search Routes

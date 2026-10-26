@@ -31,8 +31,8 @@ async function HomeMapAndRoutes() {
 
       <section aria-labelledby="map-heading" className="space-y-3">
         <div className="flex items-end justify-between gap-4">
-          <h2 id="map-heading" className="text-xl font-semibold">Map</h2>
-          <Link href="/explore" className="inline-flex items-center gap-1 text-sm font-medium text-link underline-offset-4 hover:underline">
+          <h2 id="map-heading" className="text-xl font-semibold">Route map</h2>
+          <Link href="/explore" className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-link underline-offset-4 hover:underline">
             Open full map <ArrowRight aria-hidden="true" className="size-4" />
           </Link>
         </div>
@@ -43,7 +43,7 @@ async function HomeMapAndRoutes() {
         <div className="flex items-end justify-between gap-4">
           <h2 id="featured-heading" className="text-xl font-semibold">Route directory</h2>
           {featured.length > 0 && (
-            <Link href="/explore" className="inline-flex items-center gap-1 text-sm font-medium text-link underline-offset-4 hover:underline">
+            <Link href="/explore" className="inline-flex min-h-11 items-center gap-1 text-sm font-medium text-link underline-offset-4 hover:underline">
               All routes <ArrowRight aria-hidden="true" className="size-4" />
             </Link>
           )}
@@ -71,7 +71,7 @@ async function HomeMapAndRoutes() {
 function HomeSkeleton() {
   return (
     <div className="space-y-8">
-      <Skeleton role="status" aria-label="Loading map" className="h-72 rounded-2xl sm:h-96" />
+      <Skeleton role="status" aria-label="Loading map" className="h-72 rounded-xl sm:h-96" />
       <RouteListSkeleton />
     </div>
   );
@@ -90,52 +90,45 @@ function Hero() {
     <section aria-labelledby="hero-heading" className="on-navy overflow-hidden">
       <div className="relative isolate">
         {/*
-          The photo runs to the left edge of the screen, behind the content, and ends in a curve.
-          On wide screens its width follows the content column so it never reaches the form.
+          The photo runs to the left edge of the screen, behind the content. On wide screens it ends
+          in a curve and its width follows the content column so it never reaches the form.
         */}
         <div
           aria-hidden="true"
-          className="absolute inset-y-0 left-0 -z-10 w-full bg-cover bg-center md:w-[max(52%,calc((100%_-_72rem)/2_+_37rem))] md:[border-radius:0_30%_30%_0/0_50%_50%_0]"
-          style={{ backgroundImage: `linear-gradient(90deg, rgb(23 45 70 / 0.85), rgb(23 45 70 / 0.3)), url(${HERO_IMAGE})` }}
+          className="absolute inset-y-0 left-0 -z-10 w-full bg-cover bg-center lg:w-[max(52%,calc((100%_-_72rem)/2_+_37rem))] lg:[border-radius:0_30%_30%_0/0_50%_50%_0]"
+          style={{ backgroundImage: `linear-gradient(180deg, rgb(23 45 70 / 0.8), rgb(23 45 70 / 0.65)), url(${HERO_IMAGE})` }}
         />
-        <div className="mx-auto grid w-full max-w-6xl md:min-h-[34rem] md:grid-cols-[1.15fr_1fr]">
-          <div className="flex min-h-64 items-center px-4 py-12 md:py-10">
-            <div className="space-y-4">
-              <h1 id="hero-heading" className="text-5xl leading-[1.05] font-semibold tracking-tight [text-shadow:0_2px_14px_rgb(0_0_0/0.55)] sm:text-6xl">
-                Find your way
-                <br />
-                around Butuan.
-              </h1>
-              <p className="text-sm font-medium tracking-[0.3em] uppercase">Minibus &amp; multicab routes</p>
-              <p className="max-w-sm text-sm">Routes, stops and fares. Free, with no account needed.</p>
-            </div>
+        <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 sm:py-10 lg:min-h-[32rem] lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-10 lg:py-10">
+          <div className="space-y-2 sm:space-y-4">
+            <h1 id="hero-heading" className="text-3xl leading-[1.1] font-semibold tracking-tight [text-shadow:0_2px_14px_rgb(0_0_0/0.55)] sm:text-5xl lg:text-6xl">
+              Find your way
+              <br />
+              around Butuan.
+            </h1>
+            <p className="text-xs font-medium tracking-[0.25em] uppercase sm:text-sm sm:tracking-[0.3em]">Minibus &amp; multicab routes</p>
+            <p className="max-w-sm text-sm max-sm:hidden">Routes, stops and fares. Free, with no account needed.</p>
           </div>
 
-          <div className="space-y-4 px-4 py-8 sm:px-8 md:px-5 md:py-10">
+          <div className="w-full max-w-xl space-y-3 lg:max-w-none">
             <TripSearchForm layout="hero" />
             <ul className="grid grid-cols-2 gap-3">
               {HERO_LINKS.map(({ href, title, icon: Icon }) => (
                 <li key={href}>
                   <Link
                     href={href}
-                    className="flex h-full flex-col gap-1 rounded-xl border border-white/40 p-3 text-sm font-semibold outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-ring"
+                    className="flex h-full min-h-12 items-center justify-between gap-2 rounded-xl border border-white/40 px-3 text-sm font-semibold outline-none hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     <span className="flex items-center gap-2">
                       <Icon aria-hidden="true" className="size-4" />
                       {title}
                     </span>
-                    <span className="inline-flex items-center gap-1 text-xs font-medium text-gold">
-                      VIEW HERE <ArrowRight aria-hidden="true" className="size-3" />
-                    </span>
+                    <ArrowRight aria-hidden="true" className="size-4 text-gold" />
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
         </div>
-      </div>
-      <div className="bg-black/25 py-4 text-center text-sm">
-        All Butuan <Link href="/explore" className="font-semibold text-gold underline-offset-4 hover:underline">Transit Routes</Link>
       </div>
     </section>
   );
@@ -145,7 +138,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-8 sm:py-12">
+      <div className="mx-auto w-full max-w-6xl space-y-10 px-4 py-8 sm:py-10">
 
         <Suspense fallback={<HomeSkeleton />}>
           <HomeMapAndRoutes />
@@ -155,7 +148,7 @@ export default function HomePage() {
           <h2 id="how-heading" className="text-xl font-semibold">How it works</h2>
           <ol className="grid gap-4 sm:grid-cols-3">
             {STEPS.map((step, i) => (
-              <li key={step.title} className="rounded-2xl border bg-card p-5 shadow-xs">
+              <li key={step.title} className="rounded-xl border bg-card p-5">
                 <span className="flex size-7 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
                   {i + 1}
                 </span>

@@ -18,10 +18,10 @@ export function SiteFooter() {
           </p>
         </div>
         <nav aria-label="Footer">
-          <ul className="flex flex-wrap gap-x-5 gap-y-2 sm:justify-end">
+          <ul className="flex flex-wrap gap-x-5 sm:justify-end">
             {NAV_ITEMS.map((item) => (
               <li key={item.href}>
-                <Link href={item.href} className="underline-offset-2 hover:underline">
+                <Link href={item.href} className="inline-flex min-h-11 items-center underline-offset-2 hover:underline">
                   {item.label}
                 </Link>
               </li>

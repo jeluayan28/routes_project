@@ -23,7 +23,7 @@ export function MainNavView({ pathname, className }: { pathname: string; classNa
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+                  "inline-flex h-10 items-center rounded-md px-3 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
                   active ? "bg-accent text-primary" : "text-muted-foreground hover:bg-accent hover:text-foreground",
                 )}
               >

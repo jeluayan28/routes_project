@@ -11,6 +11,8 @@ type TransportFilterProps = {
   value: readonly VehicleType[];
   onChange: (next: VehicleType[]) => void;
   legend?: string;
+  /** Shorter chips for use over a map. */
+  compact?: boolean;
   describedBy?: string;
   className?: string;
 };
@@ -20,6 +22,7 @@ export function TransportFilter({
   value,
   onChange,
   legend = "Transport type",
+  compact = false,
   describedBy,
   className,
 }: TransportFilterProps) {
@@ -37,7 +40,8 @@ export function TransportFilter({
             aria-pressed={on}
             onClick={() => toggle(type)}
             className={cn(
-              "inline-flex h-11 items-center gap-2 rounded-full border px-4 text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring sm:h-9 sm:px-3.5",
+              "inline-flex items-center gap-2 rounded-full border text-sm font-medium outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+              compact ? "h-10 px-3.5 sm:h-9" : "h-11 px-4 sm:h-9 sm:px-3.5",
               on
                 ? "border-primary bg-primary text-primary-foreground"
                 : "bg-card text-foreground hover:bg-accent",

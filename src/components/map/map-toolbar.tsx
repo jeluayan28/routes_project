@@ -19,9 +19,9 @@ type MapToolbarProps = {
 export function MapToolbar({ types, onTypesChange, routes, selectedId, onSelect }: MapToolbarProps) {
   const selectId = useId();
   return (
-    <div className="flex max-w-full flex-col gap-2 rounded-xl border bg-background/95 p-2 shadow-sm backdrop-blur">
-      <TransportFilter value={types} onChange={onTypesChange} legend="Show transport types" />
-      <div>
+    <div className="flex max-w-full flex-col gap-2 rounded-xl border bg-background p-1.5 shadow-sm sm:p-2">
+      <TransportFilter value={types} onChange={onTypesChange} legend="Show transport types" compact />
+      <div className="max-sm:hidden">
         <label htmlFor={selectId} className="sr-only">
           Select a route
         </label>

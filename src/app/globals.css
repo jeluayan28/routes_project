@@ -127,6 +127,17 @@
   --input: rgb(247 245 239 / 28%);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -153,6 +164,18 @@
 .leaflet-popup-content p,
 .leaflet-popup-content h3 {
   margin: 0;
+}
+/* Bigger touch targets on Leaflet's own buttons for fingers. */
+@media (pointer: coarse) {
+  .leaflet-bar a {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+  }
+}
+.leaflet-touch .leaflet-bar {
+  border: 1px solid #dce6e5;
+  box-shadow: 0 1px 2px rgb(23 45 70 / 15%);
 }
 .route-hit-line {
   cursor: pointer;

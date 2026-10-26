@@ -138,7 +138,7 @@ function Journeys({ response, params, form }: { response: Extract<TripSearchResp
   const count = response.journeys.length;
 
   return (
-    <div className="flex flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row">
+    <div className={cn("flex flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row", view === "map" && "max-lg:h-[calc(100svh-3.5rem)]")}>
       <section aria-label="Search and results" className="flex min-w-0 flex-col lg:w-[28rem] lg:shrink-0 lg:border-r xl:w-[32rem]">
         <h1 className="sr-only">Find a route</h1>
         {form && (
@@ -234,7 +234,7 @@ function Journeys({ response, params, form }: { response: Extract<TripSearchResp
         </div>
       </section>
 
-      <div className={cn("relative min-w-0 flex-1 max-lg:h-[calc(100svh-3.5rem-4.5rem)] max-lg:min-h-80 lg:min-h-0", view === "list" && "max-lg:hidden")}>
+      <div className={cn("relative min-w-0 flex-1 max-lg:min-h-0 lg:min-h-0", view === "list" && "max-lg:hidden")}>
         {selected && (
           <p className="pointer-events-none absolute inset-x-0 bottom-7 z-[500] mx-auto w-fit max-w-[calc(100%-1.5rem)] truncate rounded-full border bg-background/95 px-3 py-1.5 text-sm font-medium shadow-sm lg:hidden">
             Option {selectedIndex + 1} · {transfersText(selected.summary.transfers)}
@@ -261,7 +261,6 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
   const headingId = `journey-${index}`;
   const rank = describeRank(journey, params.preference);
   const transfers = transfersText(journey.summary.transfers);
-  let rideNumber = 0;
   return (
     <article aria-labelledby={headingId} className={cn("rounded-xl border bg-card p-4 shadow-xs", selected && "border-primary ring-2 ring-primary/25")}>
       <header className="space-y-3">
@@ -317,7 +316,7 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
               </li>
             );
           }
-          rideNumber += 1;
+          const rideNumber = journey.steps.slice(0, i + 1).filter((x) => x.type === "ride").length;
           return (
             <li key={i} className="relative pb-4 pl-9 last:pb-0">
               {rail}
