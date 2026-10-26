@@ -26,10 +26,10 @@ async function RouteContent({ params }: { params: PageProps<"/routes/[id]">["par
     <div className="space-y-4">
       <SampleDataBanner source={result.source} />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,26rem)_1fr]">
-        <div className="rounded-2xl border bg-card p-5 shadow-xs">
+        <div className="min-w-0 rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
           <RouteDetailsPanel route={route} headingLevel="h1" />
         </div>
-        <div className="isolate order-first h-80 overflow-hidden rounded-2xl border shadow-xs lg:sticky lg:top-20 lg:order-none lg:h-[calc(100svh-7rem)]">
+        <div className="isolate order-first h-60 overflow-hidden rounded-2xl border shadow-xs sm:h-80 lg:sticky lg:top-20 lg:order-none lg:h-[calc(100svh-7rem)]">
           <RouteMapLazy
             routes={[route]}
             selectedId={route.id}
@@ -58,10 +58,10 @@ function RouteSkeleton() {
 
 export default function RoutePage({ params }: PageProps<"/routes/[id]">) {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-4 px-4 py-6">
+    <div className="mx-auto w-full max-w-6xl space-y-4 px-4 py-4 sm:py-6">
       <Link
         href="/explore"
-        className="inline-flex items-center gap-1 rounded text-sm font-medium text-link outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+        className="-ml-1 inline-flex min-h-11 items-center gap-1 rounded px-1 text-sm font-medium text-link outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
       >
         <ArrowLeft aria-hidden="true" className="size-4" />
         Back to all routes

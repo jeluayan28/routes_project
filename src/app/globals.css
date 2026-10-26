@@ -168,20 +168,20 @@
   height: 16px;
   margin: 6px;
   border-radius: 9999px;
-  border: 3px solid #1e293b;
+  border: 3px solid #172d46;
   background: #ffffff;
   box-shadow: 0 0 0 1.5px #ffffff;
 }
 .stop-marker--start > span {
-  background: #16a34a;
-  border-color: #14532d;
+  background: #20b8a6;
+  border-color: #172d46;
   width: 20px;
   height: 20px;
   margin: 4px;
 }
 .stop-marker--end > span {
-  background: #dc2626;
-  border-color: #7f1d1d;
+  background: #f2b84b;
+  border-color: #172d46;
   width: 20px;
   height: 20px;
   margin: 4px;
@@ -196,7 +196,7 @@
   opacity: 0.5;
 }
 .stop-marker:focus-visible > span {
-  outline: 3px solid #2563eb;
+  outline: 3px solid #20b8a6;
   outline-offset: 2px;
 }
 
@@ -213,8 +213,8 @@
   margin: 2px;
   border-radius: 9999px;
   border: 2px solid #ffffff;
-  background: #1e293b;
+  background: #172d46;
   color: #ffffff;
   font: 600 12px/1 var(--font-sans), system-ui, sans-serif;
-  box-shadow: 0 0 0 1.5px #1e293b;
+  box-shadow: 0 0 0 1.5px #172d46;
 }

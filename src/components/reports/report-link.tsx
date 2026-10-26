@@ -28,7 +28,7 @@ export function ReportLink({
   if (direction) q.set("direction", direction);
   const query = q.toString();
   return (
-    <Link href={`/report${query ? `?${query}` : ""}`} className={cn(buttonVariants({ variant: "outline" }), className)}>
+    <Link href={`/report${query ? `?${query}` : ""}`} className={cn(buttonVariants({ variant: "outline" }), "h-10 px-3", className)}>
       <Flag aria-hidden="true" />
       Report incorrect information
     </Link>

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useId, useRef, useState, type FormEvent } from "react";
-import { ArrowUpDown, LocateFixed, Search } from "lucide-react";
+import { ArrowUpDown, ChevronDown, LocateFixed, Search } from "lucide-react";
 import { PlaceInput } from "@/components/search/place-input";
 import { TransportFilter } from "@/components/search/transport-filter";
 import { Button } from "@/components/ui/button";
@@ -20,8 +20,11 @@ export type TripSearchFormProps = {
   onSearch?: (input: TripSearchInput) => void;
   /** Values to start with, e.g. from the URL of a previous search. */
   initial?: Partial<TripSearchInput>;
-  /** "hero" is the compact "Where to go?" card on the home page: stacked fields, options tucked away. */
-  layout?: "default" | "hero";
+  /**
+   * "hero" is the "Where to go?" card on the home page; "panel" is the same stacked form
+   * with no card chrome, for the search sidebar. Both tuck the options away.
+   */
+  layout?: "default" | "hero" | "panel";
 };
 
 const PREFERENCE_LABEL: Record<Preference, string> = {
@@ -60,6 +63,8 @@ const TRANSFER_OPTIONS: Option[] = Array.from({ length: HARD_MAX_TRANSFERS + 1 }
 
 export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSearchFormProps) {
   const hero = layout === "hero";
+  const panel = layout === "panel";
+  const stacked = hero || panel;
   const router = useRouter();
   const uid = useId();
   const formRef = useRef<HTMLFormElement>(null);
@@ -127,14 +132,36 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
   );
 
   const options = (
-    <>
-      <div className={cn("grid gap-3", !hero && "sm:grid-cols-3")}>
-        <OptionSelect id={`${uid}-category`} label="Passenger" value={category} options={CATEGORY_OPTIONS} onChange={(v) => setCategory(fareCategorySchema.parse(v))} />
-        <OptionSelect id={`${uid}-pref`} label="Prefer" value={preference} options={PREFERENCE_OPTIONS} onChange={(v) => setPreference(v as Preference)} />
-        <OptionSelect id={`${uid}-transfers`} label="Up to" value={String(maxTransfers)} options={TRANSFER_OPTIONS} onChange={(v) => setMaxTransfers(Number(v))} />
-      </div>
-      {hero && transportFilter}
-    </>
+    <div className={cn("grid gap-3", !stacked && "sm:grid-cols-3")}>
+      <OptionSelect id={`${uid}-category`} label="Passenger" value={category} options={CATEGORY_OPTIONS} onChange={(v) => setCategory(fareCategorySchema.parse(v))} />
+      <OptionSelect id={`${uid}-pref`} label="Prefer" value={preference} options={PREFERENCE_OPTIONS} onChange={(v) => setPreference(v as Preference)} />
+      <OptionSelect id={`${uid}-transfers`} label="Up to" value={String(maxTransfers)} options={TRANSFER_OPTIONS} onChange={(v) => setMaxTransfers(Number(v))} />
+    </div>
+  );
+
+  const locate = (
+    <button
+      type="button"
+      onClick={useMyLocation}
+      disabled={locating === "busy"}
+      className="-my-2 inline-flex min-h-10 items-center gap-1.5 rounded px-1 text-sm font-medium text-link underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+    >
+      <LocateFixed aria-hidden="true" className="size-4" />
+      {locating === "busy" ? "Finding you…" : "Use my location"}
+    </button>
+  );
+
+  const swapButton = (
+    <Button
+      type="button"
+      variant="outline"
+      size="icon"
+      onClick={swap}
+      aria-label="Swap starting point and destination"
+      className={cn("size-11 rounded-full bg-card", !stacked && "md:size-9")}
+    >
+      <ArrowUpDown aria-hidden="true" className={stacked ? undefined : "md:-rotate-90"} />
+    </Button>
   );
 
   return (
@@ -143,47 +170,26 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
       onSubmit={submit}
       noValidate
       aria-label="Search routes"
-      className={cn("space-y-4 rounded-2xl border bg-card p-4 shadow-xs sm:p-5", hero && "on-light border-transparent p-5 shadow-xl sm:p-6")}
+      className={cn(
+        "space-y-4 rounded-2xl border bg-card p-4 shadow-xs sm:p-5",
+        hero && "on-light border-transparent p-4 shadow-xl sm:p-6",
+        panel && "rounded-none border-0 bg-transparent p-0 shadow-none sm:p-0",
+      )}
     >
-      {hero && <h2 className="text-2xl font-semibold tracking-tight">Where to go?</h2>}
-      <div className={cn("grid items-start gap-3", hero ? "grid-cols-1" : "md:grid-cols-[1fr_auto_1fr]")}>
-        <div className="space-y-1.5">
-          <PlaceInput
-            id={`${uid}-from`}
-            kind="origin"
-            label="Starting point"
-            placeholder="A stop, a landmark, or coordinates"
-            value={from}
-            onChange={setFrom}
-            error={errors.from}
-          />
-          <button
-            type="button"
-            onClick={useMyLocation}
-            disabled={locating === "busy"}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded text-sm font-medium text-link underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
-          >
-            <LocateFixed aria-hidden="true" className="size-4" />
-            {locating === "busy" ? "Finding you…" : "Use my location"}
-          </button>
-          {locating === "failed" && (
-            <p role="status" className="text-sm text-muted-foreground">
-              We couldn&apos;t get your location. Type a place instead.
-            </p>
-          )}
-        </div>
-        <div className={cn("flex justify-center", !hero && "md:pt-[1.625rem]")}>
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={swap}
-            aria-label="Swap starting point and destination"
-            className="size-11 rounded-full md:size-9"
-          >
-            <ArrowUpDown aria-hidden="true" className={hero ? undefined : "md:-rotate-90"} />
-          </Button>
-        </div>
+      {hero && <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Where to go?</h2>}
+      <div className={cn("grid items-center gap-x-2 gap-y-3", stacked ? "grid-cols-[minmax(0,1fr)_auto]" : "md:grid-cols-[1fr_auto_1fr] md:items-start")}>
+        <PlaceInput
+          id={`${uid}-from`}
+          kind="origin"
+          label="Starting point"
+          placeholder="A stop, a landmark, or coordinates"
+          value={from}
+          onChange={setFrom}
+          error={errors.from}
+          labelAction={locate}
+          className={stacked ? "col-start-1" : undefined}
+        />
+        <div className={cn("flex justify-center", stacked ? "col-start-2 row-span-2 row-start-1 self-center pt-6" : "md:pt-[1.625rem]")}>{swapButton}</div>
         <PlaceInput
           id={`${uid}-to`}
           kind="destination"
@@ -192,26 +198,35 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
           value={to}
           onChange={setTo}
           error={errors.to}
+          className={stacked ? "col-start-1" : undefined}
         />
       </div>
+      {locating === "failed" && (
+        <p role="status" className="text-sm text-muted-foreground">
+          We couldn&apos;t get your location. Type a place instead.
+        </p>
+      )}
 
-      {hero ? (
-        <details open={errors.types ? true : undefined} className="rounded-lg border border-dashed px-3 py-2">
-          <summary className="cursor-pointer text-sm font-medium text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
-            More options
+      {stacked && transportFilter}
+
+      {stacked ? (
+        <details open={errors.types ? true : undefined} className="group rounded-lg border border-dashed px-3">
+          <summary className="flex min-h-11 cursor-pointer items-center justify-between text-sm font-medium text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            Passenger, preference &amp; transfers
+            <ChevronDown aria-hidden="true" className="size-4 transition-transform group-open:rotate-180" />
           </summary>
-          <div className="mt-3 space-y-4">{options}</div>
+          <div className="pt-1 pb-3">{options}</div>
         </details>
       ) : (
         options
       )}
 
-      <div className={cn("flex flex-col gap-3", !hero && "sm:flex-row sm:items-center sm:justify-between")}>
-        {!hero && transportFilter}
+      <div className={cn("flex flex-col gap-3", !stacked && "sm:flex-row sm:items-center sm:justify-between")}>
+        {!stacked && transportFilter}
         <Button
           type="submit"
           size="lg"
-          className={cn("h-11 sm:min-w-40", hero && "w-full bg-gold font-semibold text-gold-foreground hover:bg-gold/90")}
+          className={cn("h-12 text-base sm:min-w-40", stacked && "w-full", hero && "bg-gold font-semibold text-gold-foreground hover:bg-gold/90")}
         >
           <Search aria-hidden="true" />
           Search Routes

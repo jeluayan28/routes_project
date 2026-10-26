@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
-import { Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import { ErrorMessage } from "@/components/common/error-message";
 import { VerificationNotice } from "@/components/common/verification-notice";
 import { TripResults } from "@/components/search/trip-results";
@@ -16,54 +16,67 @@ export const metadata: Metadata = {
   description: "Find verified minibus and multicab routes between two places in Butuan City, with transfers and fares where verified.",
 };
 
+/** Centred column for states with no results to show beside a map. */
+function Centered({ children }: { children: ReactNode }) {
+  return (
+    <div className="mx-auto w-full max-w-xl space-y-6 px-4 py-6 sm:py-10">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Find a route</h1>
+        <p className="text-muted-foreground">Enter where you are starting and where you are going.</p>
+      </div>
+      {children}
+      <VerificationNotice />
+    </div>
+  );
+}
+
 async function SearchContent({ searchParams }: { searchParams: PageProps<"/search">["searchParams"] }) {
   const parsed = parseTripParams(await searchParams);
 
   if (parsed.status === "empty") {
     return (
-      <>
-        <TripSearchForm />
-        <p className="text-sm text-muted-foreground">Enter where you are starting and where you are going.</p>
-      </>
+      <Centered>
+        <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
+          <TripSearchForm layout="panel" />
+        </div>
+      </Centered>
     );
   }
   if (parsed.status === "invalid") {
     return (
-      <>
-        <TripSearchForm />
+      <Centered>
+        <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
+          <TripSearchForm layout="panel" />
+        </div>
         <ErrorMessage title="Check your search" message={parsed.message} />
-      </>
+      </Centered>
     );
   }
 
   // The search depends on today's date (fares have effective dates), so it runs per request.
   await connection();
   const response = await runTripSearch(parsed.value, { loadData: loadSearchData, geocoder: geocoderFromEnv() });
-  return (
-    <>
-      <TripSearchForm initial={parsed.value} />
-      <TripResults response={response} params={parsed.value} />
-    </>
-  );
+  return <TripResults response={response} params={parsed.value} form={<TripSearchForm layout="panel" initial={parsed.value} />} />;
 }
 
 function SearchSkeleton() {
   return (
-    <div role="status" aria-label="Searching routes" className="space-y-4">
-      <Skeleton className="h-52 w-full rounded-2xl" />
-      <Skeleton className="h-40 w-full rounded-2xl" />
+    <div role="status" aria-label="Searching routes" className="flex flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row">
+      <div className="space-y-4 p-4 lg:w-[28rem] lg:border-r">
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-44 w-full rounded-xl" />
+      </div>
+      <Skeleton className="hidden flex-1 rounded-none lg:block" />
     </div>
   );
 }
 
 export default function SearchPage({ searchParams }: PageProps<"/search">) {
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Find a route</h1>
-      <Suspense fallback={<SearchSkeleton />}>
-        <SearchContent searchParams={searchParams} />
-      </Suspense>
-      <VerificationNotice />
-    </div>
+    <Suspense fallback={<SearchSkeleton />}>
+      <SearchContent searchParams={searchParams} />
+    </Suspense>
   );
 }

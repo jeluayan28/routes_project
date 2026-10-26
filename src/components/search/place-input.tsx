@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Circle, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,21 +15,26 @@ type PlaceInputProps = {
   error?: string;
   placeholder?: string;
   className?: string;
+  /** Small action shown beside the label, e.g. "Use my location". */
+  labelAction?: ReactNode;
 };
 
 /** Text field for a trip end point. Green marks the start, red the destination. */
-export function PlaceInput({ id, kind, label, value, onChange, error, placeholder, className }: PlaceInputProps) {
+export function PlaceInput({ id, kind, label, value, onChange, error, placeholder, className, labelAction }: PlaceInputProps) {
   const errorId = `${id}-error`;
   const Icon = kind === "origin" ? Circle : MapPin;
   return (
     <div className={cn("space-y-1.5", className)}>
-      <Label htmlFor={id}>{label}</Label>
+      <div className="flex items-center justify-between gap-2">
+        <Label htmlFor={id}>{label}</Label>
+        {labelAction}
+      </div>
       <div className="relative">
         <Icon
           aria-hidden="true"
           className={cn(
             "pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2",
-            kind === "origin" ? "fill-green-600 text-green-600" : "text-red-600",
+            kind === "origin" ? "fill-teal-600 text-teal-600" : "text-gold-foreground fill-gold",
           )}
         />
         <Input

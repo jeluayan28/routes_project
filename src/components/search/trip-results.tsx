@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowRight, Footprints, MapPinOff, TriangleAlert } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { ArrowRight, Footprints, List, Map as MapIcon, MapPinOff, Pencil, TriangleAlert } from "lucide-react";
 import { ErrorMessage } from "@/components/common/error-message";
 import { EmptyState } from "@/components/common/empty-state";
 import { SampleDataBanner } from "@/components/common/sample-data-banner";
+import { VerificationNotice } from "@/components/common/verification-notice";
 import { TripMapLazy } from "@/components/search/trip-map-lazy";
 import { VehicleIcon } from "@/components/routes/vehicle-icon";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { TripFare } from "@/components/fares/trip-fare";
 import { FARE_CATEGORY_LABEL, VEHICLE_LABEL } from "@/lib/format";
 import { routeColor } from "@/lib/routes/colors";
@@ -17,13 +18,38 @@ import { describeRank } from "@/lib/search/rank";
 import { tripQuery, type TripParams } from "@/lib/search/params";
 import type { ResolvedLocation } from "@/lib/search/locations";
 import type { TripSearchResponse } from "@/lib/search/service";
-import type { Journey, RideStep } from "@/lib/search/types";
+import type { Journey, RideStep, WalkStep } from "@/lib/search/types";
 import { cn } from "@/lib/utils";
 
 const formatMeters = (m: number) => (m >= 1000 ? `${(m / 1000).toFixed(1)} km` : `${m} m`);
 const formatDate = (iso: string) => new Intl.DateTimeFormat("en-PH", { dateStyle: "medium", timeZone: "Asia/Manila" }).format(new Date(iso));
+const transfersText = (n: number) => (n === 0 ? "No transfers" : `${n} transfer${n === 1 ? "" : "s"}`);
 
-export function TripResults({ response, params }: { response: TripSearchResponse; params: TripParams }) {
+const WALK_LABEL: Record<WalkStep["purpose"], string> = {
+  access: "Walk to your boarding stop",
+  transfer: "Transfer",
+  egress: "Walk to your destination",
+};
+
+export type TripResultsProps = {
+  response: TripSearchResponse;
+  params: TripParams;
+  /** The search form. Shown above the results so, on large screens, both sit in the left panel. */
+  form?: ReactNode;
+};
+
+export function TripResults({ response, params, form }: TripResultsProps) {
+  if (response.status === "ok") return <Journeys response={response} params={params} form={form} />;
+  return (
+    <div className="mx-auto w-full max-w-xl space-y-6 px-4 py-6 sm:py-10">
+      <h1 className="text-2xl font-semibold tracking-tight">Find a route</h1>
+      {form && <div className="rounded-2xl border bg-card p-4 shadow-xs sm:p-5">{form}</div>}
+      <Outcome response={response} params={params} />
+    </div>
+  );
+}
+
+function Outcome({ response, params }: { response: Exclude<TripSearchResponse, { status: "ok" }>; params: TripParams }) {
   switch (response.status) {
     case "error":
       return <ErrorMessage title="Couldn't search routes" message={response.message} />;
@@ -56,7 +82,7 @@ export function TripResults({ response, params }: { response: TripSearchResponse
               <li key={c.ref}>
                 <Link
                   href={`/search?${tripQuery({ ...params, [key]: c.ref })}`}
-                  className="block rounded-xl border bg-card p-3 outline-none hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring"
+                  className="block min-h-11 rounded-xl border bg-card p-3 outline-none hover:bg-accent/50 focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   <span className="font-medium">{c.label}</span>
                   {c.detail && <span className="block text-sm text-muted-foreground">{c.detail}</span>}
@@ -83,7 +109,7 @@ export function TripResults({ response, params }: { response: TripSearchResponse
               response.reason === "transfer-limit" && response.details.transfersNeeded !== undefined ? (
                 <Link
                   href={`/search?${tripQuery({ ...params, maxTransfers: response.details.transfersNeeded })}`}
-                  className={buttonVariants({ variant: "default" })}
+                  className={cn(buttonVariants({ variant: "default" }), "h-11 px-4")}
                 >
                   Allow {response.details.transfersNeeded} transfer{response.details.transfersNeeded === 1 ? "" : "s"}
                 </Link>
@@ -98,67 +124,130 @@ export function TripResults({ response, params }: { response: TripSearchResponse
           </p>
         </div>
       );
-
-    case "ok":
-      return <Journeys response={response} params={params} />;
   }
 }
 
-function Journeys({ response, params }: { response: Extract<TripSearchResponse, { status: "ok" }>; params: TripParams }) {
+function Journeys({ response, params, form }: { response: Extract<TripSearchResponse, { status: "ok" }>; params: TripParams; form?: ReactNode }) {
   const [selectedId, setSelectedId] = useState(response.journeys[0]?.id ?? null);
+  // Below `lg` the options and the map are separate views; from `lg` up they sit side by side.
+  const [view, setView] = useState<"list" | "map">("list");
+  const [editing, setEditing] = useState(false);
   const selected = response.journeys.find((j) => j.id === selectedId) ?? response.journeys[0] ?? null;
+  const selectedIndex = selected ? response.journeys.indexOf(selected) : -1;
   const approximate = [response.origin, response.destination].filter((l) => l.approximate);
+  const count = response.journeys.length;
 
   return (
-    <div className="space-y-4">
-      {response.dataSource === "sample" && <SampleDataBanner source="sample" />}
+    <div className="flex flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row">
+      <section aria-label="Search and results" className="flex min-w-0 flex-col lg:w-[28rem] lg:shrink-0 lg:border-r xl:w-[32rem]">
+        <h1 className="sr-only">Find a route</h1>
+        {form && (
+          <>
+            <div className="hidden border-b bg-card/60 px-4 py-4 lg:block">{form}</div>
+            <div className="border-b bg-card/60 px-4 py-2 lg:hidden">
+              {editing ? (
+                <div className="space-y-3 py-2">
+                  {form}
+                  <Button type="button" variant="ghost" className="h-11 w-full" onClick={() => setEditing(false)}>
+                    Close search
+                  </Button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <span className="min-w-0 truncate text-sm font-medium">
+                    {response.origin.label} <ArrowRight aria-hidden="true" className="inline size-3.5" /> {response.destination.label}
+                  </span>
+                  <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-link">
+                    <Pencil aria-hidden="true" className="size-3.5" />
+                    Edit search
+                  </span>
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
-      <div className="space-y-1">
-        <h2 className="text-lg font-semibold" aria-live="polite">
-          {response.journeys.length} {response.journeys.length === 1 ? "option" : "options"}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          <PlaceName place={response.origin} /> <ArrowRight aria-hidden="true" className="inline size-3.5" /> <PlaceName place={response.destination} /> ·{" "}
-          {FARE_CATEGORY_LABEL[params.category]} fare
-        </p>
-        {approximate.map((l) => (
-          <p key={l.label} className="text-sm text-muted-foreground">
-            We read your entry as <strong>{l.label}</strong>.
-          </p>
-        ))}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <ol className="space-y-4">
-          {response.journeys.map((journey, i) => (
-            <li key={journey.id}>
-              <JourneyCard
-                journey={journey}
-                index={i}
-                params={params}
-                selected={journey.id === selected?.id}
-                onSelect={() => setSelectedId(journey.id)}
-              />
-            </li>
+        <div role="group" aria-label="Results view" className="grid grid-cols-2 gap-1 border-b bg-background p-1.5 lg:hidden">
+          {(["list", "map"] as const).map((v) => (
+            <button
+              key={v}
+              type="button"
+              aria-pressed={view === v}
+              onClick={() => setView(v)}
+              className={cn(
+                "inline-flex h-11 items-center justify-center gap-2 rounded-lg text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                view === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent",
+              )}
+            >
+              {v === "list" ? <List aria-hidden="true" className="size-4" /> : <MapIcon aria-hidden="true" className="size-4" />}
+              {v === "list" ? `Options (${count})` : "Map"}
+            </button>
           ))}
-        </ol>
-        <div className="order-first h-72 overflow-hidden rounded-2xl border shadow-xs lg:sticky lg:top-20 lg:order-none lg:h-[calc(100svh-7rem)]">
-          <TripMapLazy
-            journey={selected}
-            origin={response.origin}
-            destination={response.destination}
-            label={selected ? `Map of option ${response.journeys.indexOf(selected) + 1}` : "Map"}
-            className="h-full w-full"
-          />
         </div>
-      </div>
 
-      <ul className="space-y-1 text-sm text-muted-foreground">
-        {response.notes.map((n) => (
-          <li key={n}>{n}</li>
-        ))}
-        {[response.origin, response.destination].some((l) => l.source === "geocoder") && <li>Place search by OpenStreetMap Nominatim, © OpenStreetMap contributors.</li>}
-      </ul>
+        <div className={cn("space-y-4 px-4 py-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto", view === "map" && "max-lg:hidden")}>
+          {response.dataSource === "sample" && <SampleDataBanner source="sample" />}
+
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold" aria-live="polite">
+              {count} {count === 1 ? "option" : "options"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              <PlaceName place={response.origin} /> <ArrowRight aria-hidden="true" className="inline size-3.5" /> <PlaceName place={response.destination} /> ·{" "}
+              {FARE_CATEGORY_LABEL[params.category]} fare
+            </p>
+            {approximate.map((l) => (
+              <p key={l.label} className="text-sm text-muted-foreground">
+                We read your entry as <strong>{l.label}</strong>.
+              </p>
+            ))}
+          </div>
+
+          <ol className="space-y-4">
+            {response.journeys.map((journey, i) => (
+              <li key={journey.id}>
+                <JourneyCard
+                  journey={journey}
+                  index={i}
+                  params={params}
+                  selected={journey.id === selected?.id}
+                  onSelect={() => {
+                    setSelectedId(journey.id);
+                    setView("map");
+                  }}
+                />
+              </li>
+            ))}
+          </ol>
+
+          <ul className="space-y-1 text-sm text-muted-foreground">
+            {response.notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+            {[response.origin, response.destination].some((l) => l.source === "geocoder") && <li>Place search by OpenStreetMap Nominatim, © OpenStreetMap contributors.</li>}
+          </ul>
+          <VerificationNotice />
+        </div>
+      </section>
+
+      <div className={cn("relative min-w-0 flex-1 max-lg:h-[calc(100svh-3.5rem-4.5rem)] max-lg:min-h-80 lg:min-h-0", view === "list" && "max-lg:hidden")}>
+        {selected && (
+          <p className="pointer-events-none absolute inset-x-0 bottom-7 z-[500] mx-auto w-fit max-w-[calc(100%-1.5rem)] truncate rounded-full border bg-background/95 px-3 py-1.5 text-sm font-medium shadow-sm lg:hidden">
+            Option {selectedIndex + 1} · {transfersText(selected.summary.transfers)}
+          </p>
+        )}
+        <TripMapLazy
+          journey={selected}
+          origin={response.origin}
+          destination={response.destination}
+          label={selected ? `Map of option ${selectedIndex + 1}` : "Map"}
+          className="h-full w-full"
+        />
+      </div>
     </div>
   );
 }
@@ -170,16 +259,19 @@ function PlaceName({ place }: { place: ResolvedLocation }) {
 function JourneyCard({ journey, index, params, selected, onSelect }: { journey: Journey; index: number; params: TripParams; selected: boolean; onSelect: () => void }) {
   const rides = journey.steps.filter((s): s is RideStep => s.type === "ride");
   const headingId = `journey-${index}`;
+  const rank = describeRank(journey, params.preference);
+  const transfers = transfersText(journey.summary.transfers);
+  let rideNumber = 0;
   return (
-    <article aria-labelledby={headingId} className={cn("rounded-2xl border bg-card p-4 shadow-xs", selected && "border-primary ring-2 ring-primary/25")}>
-      <header className="space-y-2">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 id={headingId} className="flex flex-wrap items-center gap-2 font-semibold">
+    <article aria-labelledby={headingId} className={cn("rounded-xl border bg-card p-4 shadow-xs", selected && "border-primary ring-2 ring-primary/25")}>
+      <header className="space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <h3 id={headingId} className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
             Option {index + 1}
             {rides.map((r) => (
-              <span key={r.routeId} className="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-sm font-medium">
-                <span aria-hidden="true" className="size-2.5 rounded-full" style={{ background: routeColor(r.routeId) }} />
-                {r.routeCode}
+              <span key={r.routeId} className="inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-sm font-medium">
+                <span aria-hidden="true" className="size-2.5 shrink-0 rounded-full" style={{ background: routeColor(r.routeId) }} />
+                <span className="truncate">{r.routeCode}</span>
               </span>
             ))}
           </h3>
@@ -187,19 +279,20 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
             type="button"
             aria-pressed={selected}
             onClick={onSelect}
-            className={cn(buttonVariants({ variant: selected ? "default" : "outline", size: "sm" }), "cursor-pointer")}
+            className={cn(buttonVariants({ variant: selected ? "default" : "outline", size: "sm" }), "h-10 shrink-0 cursor-pointer px-3 text-sm")}
           >
             {selected ? "Shown on map" : "Show on map"}
             <span className="sr-only"> for option {index + 1}</span>
           </button>
         </div>
         <p className="text-sm text-muted-foreground">
-          {describeRank(journey, params.preference)} · {journey.summary.transfers === 0 ? "No transfers" : `${journey.summary.transfers} transfer${journey.summary.transfers === 1 ? "" : "s"}`}
+          {rank !== transfers && `${rank} · `}
+          {transfers}
           {journey.summary.walkingMeters > 0 && ` · about ${formatMeters(journey.summary.walkingMeters)} walking`}
         </p>
         <TripFare journey={journey} category={params.category} />
         <div className="flex flex-wrap gap-1.5">
-          <Badge variant="outline" className={journey.verification.dataStatus === "verified" ? "border-emerald-600/40 bg-emerald-50 text-emerald-900" : "border-sky-600/40 bg-sky-50 text-sky-900"}>
+          <Badge variant="outline" className={journey.verification.dataStatus === "verified" ? "border-primary/50 bg-primary/10 text-foreground" : "border-dashed text-foreground"}>
             {journey.verification.dataStatus === "verified" ? "Verified routes" : "Sample data"}
           </Badge>
           {journey.verification.oldestVerifiedAt && <Badge variant="outline">Verified {formatDate(journey.verification.oldestVerifiedAt)}</Badge>}
@@ -208,27 +301,43 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
         </div>
       </header>
 
-      <ol className="mt-4 space-y-3">
-        {journey.steps.map((step, i) =>
-          step.type === "walk" ? (
-            <li key={i} className="flex gap-3 text-sm">
-              <Footprints aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-              <p>{step.instruction}</p>
-            </li>
-          ) : (
-            <li key={i} className="flex gap-3">
-              <span aria-hidden="true" className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-white" style={{ background: routeColor(step.routeId) }}>
-                <VehicleIcon type={step.transportType} className="size-3" />
+      <ol className="mt-5">
+        {journey.steps.map((step, i) => {
+          const last = i === journey.steps.length - 1;
+          const rail = !last && <span aria-hidden="true" className="absolute top-7 -bottom-1 left-[11px] w-0.5 bg-border" />;
+          if (step.type === "walk") {
+            return (
+              <li key={i} className="relative pb-4 pl-9 last:pb-0">
+                {rail}
+                <span aria-hidden="true" className="absolute top-0.5 left-0 flex size-6 items-center justify-center rounded-full border-2 border-border bg-card text-muted-foreground">
+                  <Footprints className="size-3" />
+                </span>
+                <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">{WALK_LABEL[step.purpose]}</p>
+                <p className="text-sm break-words">{step.instruction}</p>
+              </li>
+            );
+          }
+          rideNumber += 1;
+          return (
+            <li key={i} className="relative pb-4 pl-9 last:pb-0">
+              {rail}
+              <span aria-hidden="true" className="absolute top-0.5 left-0 flex size-6 items-center justify-center rounded-full text-xs font-semibold text-white" style={{ background: routeColor(step.routeId) }}>
+                {rideNumber}
               </span>
               <div className="min-w-0 space-y-1 text-sm">
-                <p className="font-medium">{step.instruction}</p>
-                <p className="text-muted-foreground">{VEHICLE_LABEL[step.transportType]} · {step.direction === "outbound" ? "outbound" : "inbound"} direction</p>
+                <p className="flex items-center gap-1.5 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                  <VehicleIcon type={step.transportType} className="size-3.5" />
+                  {VEHICLE_LABEL[step.transportType]} · {step.direction === "outbound" ? "outbound" : "inbound"} direction
+                </p>
+                <p className="font-medium break-words">{step.instruction}</p>
                 {step.alsoServedBy.length > 0 && (
                   <p className="text-muted-foreground">Same stops and fare: {step.alsoServedBy.map((r) => r.routeCode).join(", ")}.</p>
                 )}
                 {step.intermediateStops.length > 0 && (
                   <details>
-                    <summary className="cursor-pointer text-muted-foreground">Stops along the way ({step.intermediateStops.length})</summary>
+                    <summary className="flex min-h-10 cursor-pointer items-center text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                      Stops along the way ({step.intermediateStops.length})
+                    </summary>
                     <ol className="mt-1 list-decimal pl-5">
                       {step.intermediateStops.map((name, k) => (
                         <li key={k}>{name}</li>
@@ -239,8 +348,8 @@ function JourneyCard({ journey, index, params, selected, onSelect }: { journey: 
                 {step.geometry.status === "unavailable" && <p className="text-muted-foreground">The path for this ride is not shown on the map.</p>}
               </div>
             </li>
-          ),
-        )}
+          );
+        })}
       </ol>
 
       {journey.notes.length > 0 && (

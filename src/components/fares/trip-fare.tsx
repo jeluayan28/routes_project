@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { ReportLink } from "@/components/reports/report-link";
 import { assembleTripFare } from "@/lib/fares/calculator";
 import type { FareUnavailableReason, LegFare, TripFare as TripFareResult } from "@/lib/fares/types";
@@ -20,8 +21,8 @@ export const FARE_REASON: Record<FareUnavailableReason, (category: string) => st
 const STATUS_LABEL = { verified: "Verified", unverified: "Unverified", unavailable: "Unavailable" } as const;
 const STATUS_STYLE = {
   verified: "border-gold bg-gold/20 text-foreground",
-  unverified: "border-sky-600/40 bg-sky-50 text-sky-900",
-  unavailable: "border-amber-600/40 bg-amber-50 text-amber-950",
+  unverified: "border-dashed border-input bg-muted/60 text-foreground",
+  unavailable: "border-dashed border-input bg-card text-foreground",
 } as const;
 
 /** Prices a journey's rides as a trip: one segment per ride, a total only if all are known. */
@@ -69,54 +70,62 @@ export function TripFare({ journey, category }: { journey: Journey; category: Fa
   const first = fare.segments[0];
 
   return (
-    <section aria-label={`${label} fare`} className={cn("rounded-lg border px-3 py-2", STATUS_STYLE[fare.verification])}>
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-        <p className="text-sm font-medium">{label} fare</p>
-        <p className="text-xs font-medium uppercase tracking-wide">{STATUS_LABEL[fare.verification]}</p>
+    <section aria-label={`${label} fare`} className={cn("rounded-lg border px-3 py-2.5", STATUS_STYLE[fare.verification])}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-xs font-medium">{label} fare</p>
+          {fare.total !== null ? (
+            <p className="text-2xl leading-tight font-semibold tabular-nums" aria-label={`Total ${label} fare ${formatPeso(fare.total)}, ${STATUS_LABEL[fare.verification]}`}>
+              {formatPeso(fare.total)}
+            </p>
+          ) : (
+            <p className="text-sm font-semibold">Total fare not available</p>
+          )}
+        </div>
+        <p className="shrink-0 rounded-full border border-current/30 px-2 py-0.5 text-xs font-semibold tracking-wide uppercase">{STATUS_LABEL[fare.verification]}</p>
       </div>
 
-      {fare.total !== null ? (
-        <p className="text-2xl font-semibold tabular-nums" aria-label={`Total ${label} fare ${formatPeso(fare.total)}, ${STATUS_LABEL[fare.verification]}`}>
-          {formatPeso(fare.total)}
+      {fare.total === null && (
+        <p className="mt-1 text-sm">
+          A total is only shown when every ride has a verified {label.toLowerCase()} fare.
+          {fare.knownSubtotal > 0 && <> The rides with a known fare add up to {formatPeso(fare.knownSubtotal)}, which is not the trip total.</>}
         </p>
-      ) : (
-        <div className="text-sm">
-          <p className="font-semibold">Total fare not available</p>
-          <p>
-            A total is only shown when every ride has a verified {label.toLowerCase()} fare.
-            {fare.knownSubtotal > 0 && <> The rides with a known fare add up to {formatPeso(fare.knownSubtotal)}, which is not the trip total.</>}
-          </p>
-        </div>
       )}
 
-      <ol className="mt-2 space-y-1.5 text-sm">
-        {fare.segments.map((s, i) => (
-          <li key={`${s.routeId}-${i}`} className="flex flex-wrap justify-between gap-x-4">
-            <span className="min-w-0">
-              {fare.segments.length > 1 && <span className="font-medium">Ride {i + 1}: </span>}
-              {s.routeName}
-              <span className="block text-xs text-muted-foreground">
-                {s.boardingStopName} to {s.dropoffStopName}
+      <details className="group mt-1">
+        <summary className="flex min-h-10 cursor-pointer items-center gap-1 text-sm font-medium outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          Fare breakdown
+          <ChevronDown aria-hidden="true" className="size-4 transition-transform group-open:rotate-180" />
+        </summary>
+        <ol className="mt-1 space-y-2 text-sm">
+          {fare.segments.map((s, i) => (
+            <li key={`${s.routeId}-${i}`} className="flex flex-wrap justify-between gap-x-4 border-t border-current/15 pt-2">
+              <span className="min-w-0 break-words">
+                {fare.segments.length > 1 && <span className="font-medium">Ride {i + 1}: </span>}
+                {s.routeName}
+                <span className="block text-xs text-muted-foreground">
+                  {s.boardingStopName} to {s.dropoffStopName}
+                </span>
+                {s.fare.status === "known" ? <Provenance fare={s.fare} /> : <span className="block text-xs">{FARE_REASON[s.fare.reason](label.toLowerCase())}</span>}
               </span>
-              {s.fare.status === "known" ? <Provenance fare={s.fare} /> : <span className="block text-xs">{FARE_REASON[s.fare.reason](label.toLowerCase())}</span>}
-            </span>
-            <span className="tabular-nums font-medium">
-              {s.fare.status === "known" ? (
-                <>
-                  {formatPeso(s.fare.amount)}
-                  {s.fare.basis === "flat" && <span className="block text-xs font-normal text-muted-foreground">flat route fare</span>}
-                </>
-              ) : (
-                "Unavailable"
-              )}
-            </span>
-          </li>
-        ))}
-      </ol>
+              <span className="font-medium tabular-nums">
+                {s.fare.status === "known" ? (
+                  <>
+                    {formatPeso(s.fare.amount)}
+                    {s.fare.basis === "flat" && <span className="block text-xs font-normal text-muted-foreground">flat route fare</span>}
+                  </>
+                ) : (
+                  "Unavailable"
+                )}
+              </span>
+            </li>
+          ))}
+        </ol>
+      </details>
 
-      {fare.sample && <p className="mt-2 text-xs">Sample data: these are not real Butuan fares.</p>}
-      <div className="mt-2">
-        <ReportLink type="incorrect_fare" routeId={first?.routeId} className="h-7 text-xs" />
+      {fare.sample && <p className="text-xs">Sample data: these are not real Butuan fares.</p>}
+      <div className="mt-1">
+        <ReportLink type="incorrect_fare" routeId={first?.routeId} className="h-9 text-xs" />
       </div>
     </section>
   );

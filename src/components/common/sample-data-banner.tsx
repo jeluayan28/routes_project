@@ -7,7 +7,7 @@ export function SampleDataBanner({ source }: { source: DataSource }) {
   return (
     <div
       role="note"
-      className="flex items-start gap-2 rounded-lg border border-sky-600/30 bg-sky-50 px-3 py-2 text-sm text-sky-900"
+      className="flex items-start gap-2 rounded-lg border border-gold/70 bg-gold/15 px-3 py-2 text-sm text-foreground"
     >
       <FlaskConical aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
       <p>

@@ -11,25 +11,25 @@ const STATUS: Record<
     label: "Verified",
     description: "Confirmed against an official or first-hand source.",
     icon: BadgeCheck,
-    className: "border-emerald-600/40 bg-emerald-50 text-emerald-900 dark:bg-emerald-950 dark:text-emerald-100",
+    className: "border-primary/60 bg-primary/15 text-foreground",
   },
   unverified: {
     label: "Unverified",
     description: "Reported but not yet confirmed. May be wrong or outdated.",
     icon: CircleHelp,
-    className: "border-amber-600/40 bg-amber-50 text-amber-900 dark:bg-amber-950 dark:text-amber-100",
+    className: "border-gold bg-gold/25 text-foreground",
   },
   outdated: {
     label: "Outdated",
     description: "Was verified in the past but may no longer be accurate.",
     icon: Clock,
-    className: "border-orange-600/40 bg-orange-50 text-orange-900 dark:bg-orange-950 dark:text-orange-100",
+    className: "border-dashed border-gold bg-gold/15 text-foreground",
   },
   sample: {
     label: "Sample data",
     description: "Placeholder for development. Not real transport information.",
     icon: FlaskConical,
-    className: "border-sky-600/40 bg-sky-50 text-sky-900 dark:bg-sky-950 dark:text-sky-100",
+    className: "border-dashed border-input bg-muted text-foreground",
   },
 };
 

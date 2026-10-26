@@ -27,6 +27,30 @@ function Fit({ points, token }: { points: [number, number][]; token: string }) {
   useEffect(() => {
     fit();
   }, [token]);
+
+  // The map sits in a panel that can be hidden (mobile list view) or resized
+  // (rotation, window resize). Leaflet has to be told, and the journey re-framed.
+  useEffect(() => {
+    const el = map.getContainer();
+    if (typeof ResizeObserver === "undefined") return;
+    let frame = 0;
+    let last = "";
+    const observer = new ResizeObserver(() => {
+      const size = `${el.clientWidth}x${el.clientHeight}`;
+      if (size === last || el.clientWidth === 0) return;
+      last = size;
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        map.invalidateSize({ pan: false });
+        fit();
+      });
+    });
+    observer.observe(el);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [map]);
   return null;
 }
 
@@ -51,7 +75,7 @@ export default function TripMap({ journey, origin, destination, label, className
 
   return (
     <div role="region" aria-label={label} className={className}>
-      <MapContainer center={toTuple(BUTUAN_MAP_CENTER)} zoom={BUTUAN_DEFAULT_ZOOM} minZoom={9} scrollWheelZoom={false} className="h-full w-full">
+      <MapContainer center={toTuple(BUTUAN_MAP_CENTER)} zoom={BUTUAN_DEFAULT_ZOOM} minZoom={9} scrollWheelZoom className="h-full w-full">
         <TileLayer attribution={tiles.attribution} url={tiles.url} maxZoom={tiles.maxZoom} referrerPolicy="strict-origin-when-cross-origin" />
         <Fit points={points} token={journey?.id ?? "none"} />
 
@@ -72,10 +96,10 @@ export default function TripMap({ journey, origin, destination, label, className
           </CircleMarker>,
         ])}
 
-        <CircleMarker center={toTuple(origin.position)} radius={9} pathOptions={{ color: "#14532d", fillColor: "#16a34a", fillOpacity: 1, weight: 3 }}>
+        <CircleMarker center={toTuple(origin.position)} radius={9} pathOptions={{ color: "#172d46", fillColor: "#20b8a6", fillOpacity: 1, weight: 3 }}>
           <Tooltip permanent direction="top">{`Start: ${origin.label}`}</Tooltip>
         </CircleMarker>
-        <CircleMarker center={toTuple(destination.position)} radius={9} pathOptions={{ color: "#7f1d1d", fillColor: "#dc2626", fillOpacity: 1, weight: 3 }}>
+        <CircleMarker center={toTuple(destination.position)} radius={9} pathOptions={{ color: "#172d46", fillColor: "#f2b84b", fillOpacity: 1, weight: 3 }}>
           <Tooltip permanent direction="top">{`Destination: ${destination.label}`}</Tooltip>
         </CircleMarker>
       </MapContainer>

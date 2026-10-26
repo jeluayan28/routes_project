@@ -11,7 +11,7 @@ export function LastVerified({ at, className }: { at: string | null | undefined;
   if (!at) return <p className={cn("text-xs text-muted-foreground", className)}>Last verified: date not recorded.</p>;
   const old = new Date().getTime() - new Date(at).getTime() > VERIFICATION_STALE_AFTER_DAYS * 86_400_000;
   return (
-    <p className={cn("text-xs", old ? "font-medium text-amber-800" : "text-muted-foreground", className)}>
+    <p className={cn("text-xs", old ? "font-medium text-foreground underline decoration-gold decoration-2 underline-offset-2" : "text-muted-foreground", className)}>
       Last verified {formatFareDate(at)}
       {old && ". This is a while ago, so details such as fares or stops may have changed."}
     </p>
