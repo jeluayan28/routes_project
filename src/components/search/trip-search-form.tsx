@@ -116,6 +116,7 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
   const transportFilter = (
     <div className="space-y-1.5">
       <TransportFilter
+        compact={hero}
         value={types}
         onChange={(next) => {
           setTypes(next);
@@ -152,6 +153,18 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
     </button>
   );
 
+  const swapLink = (
+    <button
+      type="button"
+      onClick={swap}
+      aria-label="Swap starting point and destination"
+      className="-my-2 inline-flex min-h-10 items-center gap-1.5 rounded px-1 text-sm font-medium text-link underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      <ArrowUpDown aria-hidden="true" className="size-4" />
+      <span>Swap</span>
+    </button>
+  );
+
   const swapButton = (
     <Button
       type="button"
@@ -159,9 +172,9 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
       size="icon"
       onClick={swap}
       aria-label="Swap starting point and destination"
-      className={cn("size-11 rounded-full bg-card shadow-sm", stacked && "absolute top-1/2 right-2 z-10 size-10 -translate-y-1/2", !stacked && "md:size-9")}
+      className="size-11 rounded-full bg-card shadow-sm active:translate-y-0! md:size-9"
     >
-      <ArrowUpDown aria-hidden="true" className={stacked ? undefined : "md:-rotate-90"} />
+      <ArrowUpDown aria-hidden="true" className="md:-rotate-90" />
     </Button>
   );
 
@@ -173,12 +186,12 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
       aria-label="Search routes"
       className={cn(
         "space-y-4 rounded-2xl border bg-card p-4 shadow-xs sm:p-5",
-        hero && "on-light border-transparent p-4 shadow-xl sm:p-6",
+        hero && "on-light max-sm:space-y-3 border-transparent p-3 shadow-xl sm:p-6",
         panel && "rounded-none border-0 bg-transparent p-0 shadow-none sm:p-0",
       )}
     >
-      {hero && <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Where to go?</h2>}
-      <div className={cn(stacked ? "relative space-y-3" : "grid items-center gap-x-2 gap-y-3 md:grid-cols-[1fr_auto_1fr] md:items-start")}>
+      {hero && <h2 className="text-lg font-semibold tracking-tight sm:text-2xl">Where to go?</h2>}
+      <div className={cn(stacked ? "space-y-3" : "grid items-center gap-x-2 gap-y-3 md:grid-cols-[1fr_auto_1fr] md:items-start")}>
         <PlaceInput
           id={`${uid}-from`}
           kind="origin"
@@ -188,9 +201,9 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
           onChange={setFrom}
           error={errors.from}
           labelAction={locate}
-          inputClassName={stacked ? "pr-14" : undefined}
+          inputClassName={stacked ? cn(hero && "max-sm:h-10") : undefined}
         />
-        <div className={cn("flex justify-center", !stacked && "md:pt-[1.625rem]")}>{swapButton}</div>
+        {!stacked && <div className="flex justify-center md:pt-[1.625rem]">{swapButton}</div>}
         <PlaceInput
           id={`${uid}-to`}
           kind="destination"
@@ -199,7 +212,8 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
           value={to}
           onChange={setTo}
           error={errors.to}
-          inputClassName={stacked ? "pr-14" : undefined}
+          labelAction={stacked ? swapLink : undefined}
+          inputClassName={stacked ? cn(hero && "max-sm:h-10") : undefined}
         />
       </div>
       {locating === "failed" && (
@@ -212,7 +226,7 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
 
       {stacked ? (
         <details open={errors.types ? true : undefined} className="group rounded-lg border border-dashed px-3">
-          <summary className="flex min-h-11 cursor-pointer items-center justify-between text-sm font-medium text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <summary className="flex min-h-11 cursor-pointer items-center justify-between max-sm:min-h-10 text-sm font-medium text-muted-foreground outline-none focus-visible:ring-2 focus-visible:ring-ring">
             Passenger, preference &amp; transfers
             <ChevronDown aria-hidden="true" className="size-4 transition-transform group-open:rotate-180" />
           </summary>
@@ -227,7 +241,7 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
         <Button
           type="submit"
           size="lg"
-          className={cn("h-12 text-base sm:min-w-40", hero && "w-full", panel && "w-full sm:w-auto", hero && "bg-gold font-semibold text-gold-foreground hover:bg-gold/90")}
+          className={cn("h-12 text-base max-sm:h-11 sm:min-w-40", hero && "w-full", panel && "w-full sm:w-auto", hero && "bg-gold font-semibold text-gold-foreground hover:bg-gold/90")}
         >
           <Search aria-hidden="true" />
           Search Routes

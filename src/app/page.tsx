@@ -98,9 +98,9 @@ function Hero() {
           className="absolute inset-y-0 left-0 -z-10 w-full bg-cover bg-center lg:w-[max(52%,calc((100%_-_72rem)/2_+_37rem))] lg:[border-radius:0_30%_30%_0/0_50%_50%_0]"
           style={{ backgroundImage: `linear-gradient(180deg, rgb(23 45 70 / 0.8), rgb(23 45 70 / 0.65)), url(${HERO_IMAGE})` }}
         />
-        <div className="mx-auto grid w-full max-w-6xl gap-6 px-4 py-6 sm:py-10 lg:min-h-[32rem] lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-10 lg:py-10">
+        <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 py-4 sm:py-10 lg:min-h-[32rem] lg:grid-cols-[1.15fr_1fr] lg:items-center lg:gap-10 lg:py-10">
           <div className="space-y-2 sm:space-y-4">
-            <h1 id="hero-heading" className="text-3xl leading-[1.1] font-semibold tracking-tight [text-shadow:0_2px_14px_rgb(0_0_0/0.55)] sm:text-5xl lg:text-6xl">
+            <h1 id="hero-heading" className="text-2xl leading-[1.1] font-semibold tracking-tight [text-shadow:0_2px_14px_rgb(0_0_0/0.55)] sm:text-5xl lg:text-6xl">
               Find your way
               <br />
               around Butuan.
@@ -111,7 +111,7 @@ function Hero() {
 
           <div className="w-full max-w-xl space-y-3 lg:max-w-none">
             <TripSearchForm layout="hero" />
-            <ul className="grid grid-cols-2 gap-3">
+            <ul className="grid grid-cols-2 gap-2 sm:gap-3">
               {HERO_LINKS.map(({ href, title, icon: Icon }) => (
                 <li key={href}>
                   <Link
