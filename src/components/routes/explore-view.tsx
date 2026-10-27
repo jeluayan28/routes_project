@@ -64,8 +64,8 @@ export function ExploreView({
   };
 
   return (
-    <div className="flex h-[calc(100svh-3.5rem)] min-h-[34rem] flex-col lg:flex-row">
-      <div className="relative min-h-[18rem] flex-1 lg:min-h-0">
+    <div className="flex h-[calc(100svh-3.5rem)] min-h-[34rem] flex-col md:flex-row">
+      <div className="relative min-h-[18rem] flex-1 md:min-h-0">
         <RouteMapLazy
           routes={mapRoutes}
           selectedId={selectedId}
@@ -98,14 +98,14 @@ export function ExploreView({
 
       <aside
         aria-label="Routes"
-        className="flex max-h-[48svh] shrink-0 flex-col rounded-t-2xl border-t bg-background shadow-[0_-4px_16px_rgba(15,27,61,0.12)] lg:order-first lg:max-h-none lg:w-[26rem] xl:w-[28rem] lg:rounded-none lg:border-t-0 lg:border-r lg:shadow-none"
+        className="flex max-h-[48svh] shrink-0 flex-col rounded-t-2xl border-t bg-background shadow-[0_-4px_16px_rgba(15,27,61,0.12)] md:order-first md:max-h-none md:w-[22rem] lg:w-[26rem] xl:w-[28rem] md:rounded-none md:border-t-0 md:border-r md:shadow-none"
       >
         <button
           type="button"
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={() => setExpanded((v) => !v)}
-          className="flex min-h-12 w-full items-center justify-between gap-2 rounded-t-2xl px-4 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring lg:hidden"
+          className="flex min-h-12 w-full items-center justify-between gap-2 rounded-t-2xl px-4 py-2 text-left outline-none focus-visible:ring-2 focus-visible:ring-ring md:hidden"
         >
           <span className="font-semibold">
             {selected ? selected.name : "Routes"}{" "}
@@ -117,7 +117,7 @@ export function ExploreView({
 
         <div
           id={panelId}
-          className={cn("min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4 lg:pt-4", !expanded && "max-lg:hidden")}
+          className={cn("min-h-0 flex-1 space-y-4 overflow-y-auto px-4 pb-4 md:pt-4", !expanded && "max-md:hidden")}
         >
           <SampleDataBanner source={source} />
 

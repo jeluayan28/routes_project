@@ -144,10 +144,11 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
       type="button"
       onClick={useMyLocation}
       disabled={locating === "busy"}
+      aria-label={locating === "busy" ? "Finding your location" : "Use my location"}
       className="-my-2 inline-flex min-h-10 items-center gap-1.5 rounded px-1 text-sm font-medium text-link underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
     >
       <LocateFixed aria-hidden="true" className="size-4" />
-      <span className="whitespace-nowrap max-[24rem]:sr-only">{locating === "busy" ? "Finding you…" : "Use my location"}</span>
+      <span className="whitespace-nowrap">{locating === "busy" ? "Finding you…" : "My location"}</span>
     </button>
   );
 
@@ -158,7 +159,7 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
       size="icon"
       onClick={swap}
       aria-label="Swap starting point and destination"
-      className={cn("size-11 rounded-full bg-card", !stacked && "md:size-9")}
+      className={cn("size-11 rounded-full bg-card shadow-sm", stacked && "absolute top-1/2 right-2 z-10 size-10 -translate-y-1/2", !stacked && "md:size-9")}
     >
       <ArrowUpDown aria-hidden="true" className={stacked ? undefined : "md:-rotate-90"} />
     </Button>
@@ -177,28 +178,28 @@ export function TripSearchForm({ onSearch, initial, layout = "default" }: TripSe
       )}
     >
       {hero && <h2 className="text-xl font-semibold tracking-tight sm:text-2xl">Where to go?</h2>}
-      <div className={cn("grid items-center gap-x-2 gap-y-3", stacked ? "grid-cols-[minmax(0,1fr)_auto]" : "md:grid-cols-[1fr_auto_1fr] md:items-start")}>
+      <div className={cn(stacked ? "relative space-y-3" : "grid items-center gap-x-2 gap-y-3 md:grid-cols-[1fr_auto_1fr] md:items-start")}>
         <PlaceInput
           id={`${uid}-from`}
           kind="origin"
           label="Starting point"
-          placeholder="A stop, a landmark, or coordinates"
+          placeholder="Stop or landmark"
           value={from}
           onChange={setFrom}
           error={errors.from}
           labelAction={locate}
-          className={stacked ? "col-start-1" : undefined}
+          inputClassName={stacked ? "pr-14" : undefined}
         />
-        <div className={cn("flex justify-center", stacked ? "col-start-2 row-span-2 row-start-1 self-center pt-6" : "md:pt-[1.625rem]")}>{swapButton}</div>
+        <div className={cn("flex justify-center", !stacked && "md:pt-[1.625rem]")}>{swapButton}</div>
         <PlaceInput
           id={`${uid}-to`}
           kind="destination"
           label="Destination"
-          placeholder="A stop, a landmark, or coordinates"
+          placeholder="Stop or landmark"
           value={to}
           onChange={setTo}
           error={errors.to}
-          className={stacked ? "col-start-1" : undefined}
+          inputClassName={stacked ? "pr-14" : undefined}
         />
       </div>
       {locating === "failed" && (

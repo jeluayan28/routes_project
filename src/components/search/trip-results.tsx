@@ -138,40 +138,37 @@ function Journeys({ response, params, form }: { response: Extract<TripSearchResp
   const count = response.journeys.length;
 
   return (
-    <div className={cn("flex flex-col lg:h-[calc(100svh-3.5rem)] lg:flex-row", view === "map" && "max-lg:h-[calc(100svh-3.5rem)]")}>
-      <section aria-label="Search and results" className="flex min-w-0 flex-col lg:w-[28rem] lg:shrink-0 lg:border-r xl:w-[32rem]">
+    <div className={cn("flex flex-col md:h-[calc(100svh-3.5rem)] md:flex-row", view === "map" && "max-md:h-[calc(100svh-3.5rem)]")}>
+      <section aria-label="Search and results" className="flex min-w-0 flex-col md:w-[22rem] md:shrink-0 md:border-r lg:w-[28rem] xl:w-[32rem]">
         <h1 className="sr-only">Find a route</h1>
         {form && (
-          <>
-            <div className="hidden border-b bg-card/60 px-4 py-4 lg:block">{form}</div>
-            <div className="border-b bg-card/60 px-4 py-2 lg:hidden">
-              {editing ? (
-                <div className="space-y-3 py-2">
-                  {form}
-                  <Button type="button" variant="ghost" className="h-11 w-full" onClick={() => setEditing(false)}>
-                    Close search
-                  </Button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setEditing(true)}
-                  className="flex min-h-11 w-full items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
-                  <span className="min-w-0 truncate text-sm font-medium">
-                    {response.origin.label} <ArrowRight aria-hidden="true" className="inline size-3.5" /> {response.destination.label}
-                  </span>
-                  <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-link">
-                    <Pencil aria-hidden="true" className="size-3.5" />
-                    Edit search
-                  </span>
-                </button>
-              )}
-            </div>
-          </>
+          <div className="border-b bg-card/60 px-4 py-2">
+            {editing ? (
+              <div className="space-y-3 py-2">
+                {form}
+                <Button type="button" variant="ghost" className="h-11 w-full" onClick={() => setEditing(false)}>
+                  Close search
+                </Button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setEditing(true)}
+                className="flex min-h-12 w-full items-center justify-between gap-3 rounded-lg text-left outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                <span className="min-w-0 truncate text-sm font-medium">
+                  {response.origin.label} <ArrowRight aria-hidden="true" className="inline size-3.5 text-primary" /> {response.destination.label}
+                </span>
+                <span className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-link">
+                  <Pencil aria-hidden="true" className="size-3.5" />
+                  Edit search
+                </span>
+              </button>
+            )}
+          </div>
         )}
 
-        <div role="group" aria-label="Results view" className="grid grid-cols-2 gap-1 border-b bg-background p-1.5 lg:hidden">
+        <div role="group" aria-label="Results view" className="grid grid-cols-2 gap-1 border-b bg-background p-1.5 md:hidden">
           {(["list", "map"] as const).map((v) => (
             <button
               key={v}
@@ -189,7 +186,7 @@ function Journeys({ response, params, form }: { response: Extract<TripSearchResp
           ))}
         </div>
 
-        <div className={cn("space-y-4 px-4 py-4 lg:min-h-0 lg:flex-1 lg:overflow-y-auto", view === "map" && "max-lg:hidden")}>
+        <div className={cn("space-y-4 px-4 py-4 md:min-h-0 md:flex-1 md:overflow-y-auto", view === "map" && "max-md:hidden")}>
           {response.dataSource === "sample" && <SampleDataBanner source="sample" />}
 
           <div className="space-y-1">
@@ -234,9 +231,9 @@ function Journeys({ response, params, form }: { response: Extract<TripSearchResp
         </div>
       </section>
 
-      <div className={cn("relative min-w-0 flex-1 max-lg:min-h-0 lg:min-h-0", view === "list" && "max-lg:hidden")}>
+      <div className={cn("relative min-w-0 flex-1 max-md:min-h-0 md:min-h-0", view === "list" && "max-md:hidden")}>
         {selected && (
-          <p className="pointer-events-none absolute inset-x-0 bottom-7 z-[500] mx-auto w-fit max-w-[calc(100%-1.5rem)] truncate rounded-full border bg-background/95 px-3 py-1.5 text-sm font-medium shadow-sm lg:hidden">
+          <p className="pointer-events-none absolute inset-x-0 bottom-7 z-[500] mx-auto w-fit max-w-[calc(100%-1.5rem)] truncate rounded-full border bg-background/95 px-3 py-1.5 text-sm font-medium shadow-sm md:hidden">
             Option {selectedIndex + 1} · {transfersText(selected.summary.transfers)}
           </p>
         )}

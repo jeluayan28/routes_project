@@ -207,11 +207,11 @@ describe("mobile layout and accessibility", () => {
     const toggle = screen.getByRole("button", { name: /Collapse route list/ });
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     const panel = document.getElementById(toggle.getAttribute("aria-controls")!)!;
-    expect(panel.className).not.toContain("max-lg:hidden");
+    expect(panel.className).not.toContain("max-md:hidden");
 
     fireEvent.click(toggle);
     expect(screen.getByRole("button", { name: /Expand route list/ })).toHaveAttribute("aria-expanded", "false");
-    expect(panel.className).toContain("max-lg:hidden");
+    expect(panel.className).toContain("max-md:hidden");
   });
 
   it("re-expands the panel when a route is picked on the map", () => {

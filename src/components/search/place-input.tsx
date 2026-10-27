@@ -15,12 +15,13 @@ type PlaceInputProps = {
   error?: string;
   placeholder?: string;
   className?: string;
+  inputClassName?: string;
   /** Small action shown beside the label, e.g. "Use my location". */
   labelAction?: ReactNode;
 };
 
 /** Text field for a trip end point. Green marks the start, red the destination. */
-export function PlaceInput({ id, kind, label, value, onChange, error, placeholder, className, labelAction }: PlaceInputProps) {
+export function PlaceInput({ id, kind, label, value, onChange, error, placeholder, className, inputClassName, labelAction }: PlaceInputProps) {
   const errorId = `${id}-error`;
   const Icon = kind === "origin" ? Circle : MapPin;
   return (
@@ -47,7 +48,7 @@ export function PlaceInput({ id, kind, label, value, onChange, error, placeholde
           maxLength={120}
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          className="h-11 bg-card pl-9"
+          className={cn("h-11 bg-card pl-9", inputClassName)}
         />
       </div>
       {error && (
