@@ -1,6 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
-import { Menu, Route, Search } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { MainNav, MainNavView } from "@/components/layout/main-nav";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -16,9 +17,7 @@ export function SiteHeader() {
           href="/"
           className="flex min-w-0 items-center gap-2 rounded-md font-semibold outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Route aria-hidden="true" className="size-4" />
-          </span>
+          <Image src="/pics/logo-mark.png" alt="" width={36} height={36} priority className="size-9 shrink-0" />
           <span className="truncate">{SITE_NAME}</span>
         </Link>
         <div className="flex items-center gap-2">
